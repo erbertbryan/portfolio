@@ -39,7 +39,7 @@ const VIDEOS = new Set(["15", "16", "18"]);
 // swinging too far round the sides.
 const rigFor = (w) =>
   w < 700
-    ? { card: 265, gap: 8, persp: 700, tilt: 2, drift: 0.034, push: 0.5, arc: 70 }
+    ? { card: 330, gap: 8, persp: 700, tilt: 2, drift: 0.034, push: 0.5, arc: 70 }
     : w < 1100
     ? { card: 435, gap: 10, persp: 880, tilt: 2, drift: 0.03, push: 0.5, arc: 72 }
     : { card: 590, gap: 12, persp: 1050, tilt: 2, drift: 0.026, push: 0.5, arc: 74 };

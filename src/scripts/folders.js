@@ -32,13 +32,17 @@ const FADE_IN = 260;
 
 /* Growing the card from an icon to a 400px window reflows the page under
    it, and the smooth-scroll module then eases the document to its new
-   height — which reads as the window flying up from below. Pinning the
-   card's viewport position across the mutation makes it expand downward
-   from where it already sat instead. */
+   height — which reads as the window flying up from below.
+
+   The anchor is the whole About window, not the folder card: opening also
+   shrinks the avatar and re-flows the rows above the folder, so pinning
+   just the card would let the container's top edge drift. Pinning the
+   container keeps it planted and lets everything grow top-to-bottom. */
 function keepInPlace(el, mutate) {
-  const before = el.getBoundingClientRect().top;
+  const anchor = el.closest(".mac") || el;
+  const before = anchor.getBoundingClientRect().top;
   mutate();
-  const after = el.getBoundingClientRect().top;
+  const after = anchor.getBoundingClientRect().top;
   const drift = after - before;
   if (Math.abs(drift) > 0.5) window.scrollBy({ top: drift, behavior: "instant" });
 }

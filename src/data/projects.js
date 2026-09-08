@@ -154,4 +154,44 @@ export const projects = [
       },
     ],
   },
+  {
+    id: "coffee",
+    layout: "hero", // one large screenshot, deliberately cropped by the frame
+    logo: "Specialty Coffee Depot",
+    logoSvg: "/brand/logos/coffee.svg",
+    logoScale: 1.5, // two-line wordmark — reads small at the shared height
+    name: "Specialty Coffee",
+    accent: "#7B4B2A",
+    tags: ["#Ecommerce", "#Web", "#Coffee", "#DesignSystem", "#Branding"],
+    platform: "Web",
+    role: "UI/UX Designer",
+    blurb:
+      "Specialty Coffee Depot PH needed a dedicated e-commerce web platform to expand its reach and establish an online storefront for its specialized coffee products.",
+    heroImage: "/carousel/coffee-hero.webp",
+    story: [
+      {
+        type: "media-text",
+        side: "left",
+        images: ["/carousel/coffee-section-3.webp"],
+        text: "I designed a seamless digital shopping experience tailored for coffee enthusiasts. By establishing clear product categorization, intuitive navigation, and a streamlined cart experience, we transformed their inventory into an accessible, conversion-friendly online store.",
+      },
+      {
+        type: "media-text",
+        side: "left",
+        images: ["/carousel/coffee-section-4.webp"],
+        text: "To ensure the platform balanced brand identity with usability, we anchored the project in a structured UX process. We conducted target audience research, mapped out primary user flows, and established information architecture before moving into mid-fidelity wireframes to validate layout structures and content hierarchy.",
+      },
+      {
+        type: "bento",
+        text: "With the UX structure validated, we translated the low-friction wireframes into high-fidelity screens, crafting a polished UI system with rich visual details that reflect the premium quality of their coffee selection.",
+        images: [
+          "/carousel/coffee-section-5-1.webp",
+          "/carousel/coffee-section-5-2.webp",
+          "/carousel/coffee-section-5-3.webp",
+          "/carousel/coffee-section-5-4.webp",
+          "/carousel/coffee-section-5-5.webp",
+        ],
+      },
+    ],
+  },
 ];

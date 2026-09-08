@@ -850,8 +850,45 @@ a {
   flex-wrap: wrap;
   justify-content: center;
   gap: clamp(18px, 3vw, 40px);
+  cursor: pointer;
 }
+.stack__list:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 12px;
+  border-radius: 12px;
+}
+
+/* ---- stacked deck ----
+   Collapsed, every tool slides toward the centre and overlaps into a pile,
+   fanned by a small rotation. Only transform/opacity animate, so the row
+   never reflows the page as it opens and closes. `--i` is each tool's
+   signed offset from the middle card (set in tools.js). */
+.stack__list.is-stacked {
+  gap: 0;
+}
+.stack__list.is-stacked .tool {
+  /* pull each tile back toward the middle: the further from centre, the
+     further it travels, which is what collapses the row into one pile */
+  transform: translateX(calc(var(--i) * -1 * (100% + var(--fan-gap, 34px))))
+    translateX(calc(var(--i) * 26px)) rotate(calc(var(--i) * 2deg));
+  z-index: var(--z);
+}
+.stack__list.is-stacked .tool__name {
+  opacity: 0;
+}
+.stack__list.is-stacked .tool__tile {
+  box-shadow: 0 10px 22px -12px rgba(23, 19, 13, 0.45);
+}
+.stack__list.is-stacked:hover .tool {
+  /* a small spread on hover, hinting the pile is openable */
+  transform: translateX(calc(var(--i) * -1 * (100% + var(--fan-gap, 34px))))
+    translateX(calc(var(--i) * 33px)) rotate(calc(var(--i) * 3deg));
+}
+
 .tool {
+  position: relative;
+  transition: transform 0.55s var(--ease);
+  will-change: transform;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -877,6 +914,12 @@ a {
   border-width: 0; /* a transparent BORDER still reserves its width, insetting
                        the image by 1px and letting the page show through */
 }
+/* artwork that is white and already carries its own padding: it fills the
+   tile like --flush, but keeps the border, or a white square would have no
+   edge against the near-white page */
+.tool__tile--fill {
+  padding: 0;
+}
 .tool:hover .tool__tile {
   transform: translateY(-4px);
   box-shadow: 0 16px 30px -14px rgba(23, 19, 13, 0.55);
@@ -889,14 +932,16 @@ a {
   user-select: none;
   -webkit-user-drag: none;
 }
-.tool__tile--flush img {
+.tool__tile--flush img,
+.tool__tile--fill img {
   object-fit: cover;
 }
 .tool__name {
   font-size: 0.76rem;
   font-weight: 600;
   color: var(--ink-mute);
-  transition: color 0.4s var(--ease);
+  white-space: nowrap;
+  transition: color 0.4s var(--ease), opacity 0.35s var(--ease);
 }
 .tool:hover .tool__name {
   color: var(--ink);
@@ -2512,13 +2557,35 @@ body.no-scroll {
     border-left: 0;
     border-top: 1px solid var(--line);
   }
+  /* stack: avatar, then bio, then the desktop folders. The grid needs its
+     areas redefined — the old `flex-direction: column` here silently did
+     nothing once .about__inner became a grid, which left the bio crushed
+     into a ~90px column on phones. */
   .about__inner {
-    flex-direction: column;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "avatar"
+      "text"
+      "folders";
+    justify-items: center;
     text-align: center;
-    align-items: center;
+    row-gap: clamp(20px, 5vw, 32px);
+  }
+  /* an open folder window already spans the single column */
+  .about__inner:has(.folder.is-open) {
+    grid-template-areas:
+      "avatar"
+      "text"
+      "folders";
+  }
+  .about__inner > .avatar {
+    justify-self: center;
   }
   .about__text {
     margin-inline: auto;
+  }
+  .folders__grid {
+    margin-top: 0;
   }
 }
 
@@ -2540,6 +2607,14 @@ body.no-scroll {
   /* let the headline wrap naturally rather than on the desktop break */
   .hero__title br {
     display: none;
+  }
+  /* the tags wrap to several rows on a phone; the desktop line-height
+     and 18px gap left them looking loosely stacked */
+  .case__tags {
+    gap: 5px 14px;
+  }
+  .case__tags span {
+    line-height: 1.25;
   }
   .chip {
     font-size: 0.86rem;

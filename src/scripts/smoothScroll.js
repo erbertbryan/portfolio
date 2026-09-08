@@ -48,6 +48,14 @@ export function initSmoothScroll() {
     const dt = last ? Math.min(now - last, 50) : 16.67;
     last = now;
 
+    // Re-clamp every frame against the *current* page height. Lazy media and
+    // reveal animations can shorten the document mid-glide; without this the
+    // target can sit past the end, and we keep writing a scroll position the
+    // browser clamps back — the two fighting each frame is what jitters.
+    const max = maxScroll();
+    if (target > max) target = max;
+    if (current > max) current = max;
+
     // frame-rate independent easing, so 165Hz doesn't glide faster than 60Hz
     const k = 1 - Math.pow(1 - EASE, dt / 16.67);
     current += (target - current) * k;
@@ -76,7 +84,12 @@ export function initSmoothScroll() {
     if (document.hidden) return;
 
     e.preventDefault();
-    if (!driving) current = window.scrollY; // pick up wherever we actually are
+    // pick up wherever we actually are. `target` has to be rebased too, not
+    // just `current`: anything that moved the page without us (anchor jump,
+    // keyboard, scrollbar drag, a programmatic scrollBy, or the browser
+    // clamping at the very bottom) leaves a stale target behind, and adding
+    // this delta to it would fling the page somewhere unrelated.
+    if (!driving) target = current = window.scrollY;
     driving = true;
     target = Math.max(0, Math.min(maxScroll(), target + e.deltaY));
     if (!raf) raf = requestAnimationFrame(tick);

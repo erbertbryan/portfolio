@@ -119,12 +119,16 @@ function storyBodyMarkup(project) {
       }
       if (s.type === "bento") {
         const count = s.images.length;
-        // 7 groups into rows of 2/3/2 — every tile in a row is equal
-        // width, which (since these source images all share one aspect
-        // ratio) means rows match height on their own with no crop or
-        // letterboxing needed, unlike an asymmetric big+small span.
-        if (count === 7) {
-          const groups = [s.images.slice(0, 2), s.images.slice(2, 5), s.images.slice(5, 7)];
+        // Counts that don't divide evenly into a 2-up grid get explicit row
+        // sizes instead, so no tile is ever left alone on the last row.
+        // Every tile in a row is equal width, which (since these source
+        // images share one aspect ratio) means rows match height on their
+        // own — no crop, no letterboxing, unlike an asymmetric big+small
+        // span. Max 3 per row.
+        const ROWS = { 5: [2, 3], 7: [2, 3, 2] };
+        if (ROWS[count]) {
+          let at = 0;
+          const groups = ROWS[count].map((n) => s.images.slice(at, (at += n)));
           const rows = groups
             .map(
               (group) =>
