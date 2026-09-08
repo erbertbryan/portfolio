@@ -1,0 +1,18 @@
+LOGO SWAP
+=========
+
+The site currently uses a recreated "B✦RYAN" wordmark (HTML + a yellow sparkle SVG),
+rendered in the nav and footer.
+
+To use your EXACT logo instead, drop your export here, e.g.:
+  public/brand/bryan.svg          (letters in a neutral color / currentColor)
+  public/brand/bryan-light.svg    (optional white version for the dark footer)
+
+SVG is strongly preferred (crisp at any size, can inherit color). A transparent
+PNG at ~3x also works.
+
+Then tell me and I'll wire it into the nav + footer wordmark in one place
+(the `.brand` markup in index.html and `.footer__brand`). Nothing else needs to change.
+
+I couldn't pull the logo image you pasted in chat directly into the repo — chat
+images aren't saved to disk — which is why this recreation is the placeholder.

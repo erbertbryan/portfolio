@@ -1,0 +1,2576 @@
+/* ============================================================
+   Erbert Bryan — Portfolio
+   Soft Structuralism · warm paper, bold grotesk, kinetic motion
+   ============================================================ */
+
+/* woff2 only — it's ~46% lighter than the source otf, and any browser
+   without woff2 support also lacks :has() and object-fit, which this
+   stylesheet leans on heavily, so an older fallback would be dead weight */
+@font-face {
+  font-family: "SK Modernist";
+  src: url("/fonts/SkModernist-Regular.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --paper: #f7f7f6;
+  --paper-2: #ededec;
+  --ink: #161512;
+  --ink-soft: #55524c;
+  --ink-mute: #9b9793;
+  --line: #e7e6e3;
+  --yellow: #f5c518;
+  --yellow-deep: #e0a800;
+  --coral: #f2643f;
+  --coral-soft: #ff7a52;
+  --green: #2f9e63;
+  --card: #ffffff;
+
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --edge: clamp(20px, 5vw, 80px);
+  --maxw: 1440px;
+
+  --font-heavy: "SK Modernist", "Archivo Black", system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Space Mono", ui-monospace, monospace;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  /* smooth scrolling is handled in JS (smoothScroll.js) so the eased wheel
+     and anchor jumps share one system — a CSS behaviour here fights it */
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: clamp(15px, 1.05vw, 17px);
+  line-height: 1.6;
+  overflow-x: clip;
+  cursor: default;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: var(--yellow);
+  color: var(--ink);
+}
+
+/* ---------- grain overlay ---------- */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ============================================================
+   NAV
+   ============================================================ */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 80;
+  padding: clamp(14px, 2vw, 22px) var(--edge);
+  transition: transform 0.6s var(--ease);
+}
+.nav__inner {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 10px 14px 10px 18px;
+  border-radius: 999px;
+  transition: background 0.5s var(--ease), box-shadow 0.5s var(--ease),
+    backdrop-filter 0.5s var(--ease);
+}
+.nav.is-stuck .nav__inner {
+  background: color-mix(in srgb, var(--paper) 72%, transparent);
+  backdrop-filter: blur(18px) saturate(1.4);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 12px 40px -24px rgba(23, 19, 13, 0.5);
+}
+
+/* brand wordmark (inline SVG logo) */
+.brand {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  color: var(--ink);
+}
+.brandmark {
+  height: 100%;
+  width: auto;
+  display: block;
+  overflow: visible;
+}
+
+.nav__links {
+  justify-self: center;
+  display: flex;
+  gap: clamp(18px, 3vw, 40px);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.nav__links a {
+  position: relative;
+  padding: 4px 2px;
+  color: var(--ink-soft);
+  transition: color 0.4s var(--ease);
+}
+.nav__links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 100%;
+  height: 1.5px;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.5s var(--ease);
+}
+.nav__links a:hover {
+  color: var(--ink);
+}
+.nav__links a:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.nav__socials {
+  justify-self: end;
+  display: flex;
+  gap: 6px;
+}
+.nav__socials a,
+.nav__socials .nav__ico {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  padding: 0;
+  background: none;
+  border-radius: 999px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: background 0.4s var(--ease), color 0.4s var(--ease),
+    transform 0.4s var(--ease);
+}
+.nav__socials a:hover,
+.nav__socials .nav__ico:hover {
+  background: var(--ink);
+  color: var(--paper);
+  transform: translateY(-2px);
+}
+.ic {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(148px, 21vh, 224px) var(--edge) 0;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* headline block sits above the wheel */
+.hero__top {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex: 0 0 auto;
+}
+.hero__cta {
+  margin-top: clamp(22px, 3vw, 34px);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 9px 9px 24px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: transform 0.45s var(--ease), box-shadow 0.45s var(--ease);
+  box-shadow: 0 14px 30px -16px rgba(23, 19, 13, 0.7);
+}
+.hero__cta i {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: color-mix(in srgb, #fff 16%, transparent);
+  display: grid;
+  place-items: center;
+  transition: transform 0.5s var(--ease);
+}
+.hero__cta i svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.hero__cta:hover {
+  box-shadow: 0 20px 40px -16px rgba(23, 19, 13, 0.8);
+}
+
+/* the logo's own 4-point star, greyed out until hovered.
+   ".hero__cta i.hero__cta-star svg" outweighs ".hero__cta i svg" above —
+   both a class and two type selectors, so this actually wins the cascade */
+.hero__cta i.hero__cta-star svg {
+  width: 16px;
+  height: 16px;
+  fill: color-mix(in srgb, var(--paper) 55%, transparent);
+  stroke: none;
+  transition: fill 0.4s var(--ease), filter 0.4s var(--ease);
+}
+.hero__cta:hover i.hero__cta-star svg {
+  fill: var(--yellow);
+  filter: drop-shadow(0 0 7px color-mix(in srgb, var(--yellow) 85%, transparent));
+  animation: cta-spin 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes cta-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* the wheel fills whatever height is left under the headline */
+.hero__stage {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  width: 100vw;
+  min-height: clamp(260px, 46vh, 620px);
+  margin-top: clamp(4px, 1vh, 14px);
+}
+
+/* 3D screen wheel — shots mounted around a slowly turning cylinder */
+.hero__grid {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  overflow: hidden;
+}
+.wheel-wrap {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  /* nudge the ring up toward the hero copy */
+  padding-bottom: clamp(40px, 12vh, 160px);
+  perspective: 1500px;
+  perspective-origin: 50% 50%;
+  cursor: grab;
+  touch-action: pan-y; /* let the page still scroll vertically */
+}
+.wheel-wrap.is-dragging {
+  cursor: grabbing;
+}
+.wheel-wrap.is-dragging .shot {
+  transition: none;
+}
+.wheel {
+  position: relative;
+  width: var(--card-w, 420px);
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.shot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--card-w, 420px);
+  aspect-ratio: 16 / 9;
+  margin: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--card);
+  border: 1px solid rgba(23, 19, 13, 0.07);
+  box-shadow: 0 40px 90px -55px rgba(23, 19, 13, 0.6);
+  /* seat the card on the INNER wall of the ring (concave: negative Z puts
+     the middle of the arc away from us, sides swing forward) */
+  transform: translate(-50%, -50%) rotateY(var(--a, 0deg)) translateZ(calc(-1 * var(--r, 900px)));
+  transform-origin: center center;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+  transition: filter 0.5s var(--ease);
+}
+.shot img,
+.shot video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none; /* let the figure own the hit area */
+}
+
+/* lens-blur panels: soften the wheel as it runs off each edge */
+.wheel-lens-blur {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: clamp(110px, 22vw, 380px);
+  pointer-events: none;
+  backdrop-filter: blur(13px);
+  -webkit-backdrop-filter: blur(13px);
+  /* the mask makes this strongest at the outer edge, so the wheel both
+     blurs and dissolves into the page as it runs off screen */
+  background: color-mix(in srgb, var(--paper) 82%, transparent);
+}
+.wheel-lens-blur--left {
+  left: 0;
+  -webkit-mask-image: linear-gradient(to right, #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 100%);
+  mask-image: linear-gradient(to right, #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 100%);
+}
+.wheel-lens-blur--right {
+  right: 0;
+  -webkit-mask-image: linear-gradient(to left, #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 100%);
+  mask-image: linear-gradient(to left, #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 100%);
+}
+
+/* soft scrim: feathers the wheel into the page top and bottom */
+.hero__veil {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none; /* never intercept hover on the wheel */
+  background: linear-gradient(
+    to bottom,
+    var(--paper) 0%,
+    transparent 20%,
+    transparent 68%,
+    var(--paper) 97%
+  );
+}
+
+/* avatar */
+.avatar {
+  position: relative;
+  width: clamp(180px, 22vw, 300px);
+  aspect-ratio: 1;
+  flex: 0 0 auto;
+}
+.avatar__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* the Rive artboard reacts to the pointer, so signal it's interactive */
+  cursor: pointer;
+  border-radius: 50%;
+  background: var(--coral);
+  box-shadow: 0 40px 80px -40px rgba(242, 100, 63, 0.7),
+    0 0 0 1px rgba(23, 19, 13, 0.04);
+  z-index: 1;
+}
+.avatar__ring {
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  border: 1px dashed color-mix(in srgb, var(--ink) 22%, transparent);
+  animation: spin 26s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.hero__title {
+  font-family: var(--font-heavy);
+  font-weight: 400;
+  font-size: clamp(1.75rem, 4vw, 3.7rem);
+  line-height: 1.06;
+  letter-spacing: -0.015em;
+  max-width: 34ch;
+  color: var(--ink);
+}
+
+/* scroll cue */
+.hero__scroll {
+  position: absolute;
+  bottom: clamp(22px, 4vh, 42px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  z-index: 3;
+}
+.hero__scroll-label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+.hero__arrow {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  /* deliberately opaque, no backdrop-filter: a blurred circle flashes
+     dark for a frame on load in Chrome while the backdrop root is still
+     compositing, and over a plain paper background the blur bought
+     nothing visually anyway */
+  background: var(--paper);
+  animation: bob 1.8s var(--ease) infinite;
+}
+.hero__arrow svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(7px);
+  }
+}
+
+/* ============================================================
+   SHARED SECTION HEADINGS
+   ============================================================ */
+.section-head {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 0 var(--edge);
+}
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7em;
+  margin-bottom: 1.4rem;
+}
+.eyebrow__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--coral);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--coral) 20%, transparent);
+}
+.section-title {
+  font-family: var(--font-heavy);
+  font-weight: 400;
+  font-size: clamp(2rem, 5vw, 3.9rem);
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+  max-width: 18ch;
+}
+.section-title .muted {
+  color: var(--ink-mute);
+}
+.section-lead {
+  margin-top: 1.6rem;
+  max-width: 54ch;
+  font-size: clamp(1rem, 1.25vw, 1.2rem);
+  color: var(--ink-soft);
+}
+.section-lead strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* ============================================================
+   PROCESS  (clean · single AI-native flow)
+   ============================================================ */
+.process {
+  position: relative;
+  padding: clamp(80px, 12vw, 160px) 0;
+  background: transparent;
+  color: var(--ink);
+}
+.process .section-head {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.process .section-title {
+  max-width: 22ch;
+}
+.process .section-lead {
+  text-align: center;
+  max-width: 58ch;
+}
+.process .section-title .arrow {
+  font-weight: 400;
+  color: var(--ink-mute);
+  padding: 0 0.06em;
+}
+.process .section-title .grad {
+  background: linear-gradient(100deg, #6c5ce7, #f472b6 38%, #f5a524 72%, #34d399);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.proc {
+  position: relative;
+  max-width: 1060px;
+  margin: clamp(36px, 5vw, 56px) auto 0;
+  padding: 0 var(--edge);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(30px, 4vw, 48px);
+}
+
+/* ---- traditional / ai-native switch ---- */
+.proc__switch {
+  position: relative;
+  display: inline-flex;
+  padding: 5px;
+  border-radius: 999px;
+  background: var(--paper-2);
+  border: 1px solid var(--line);
+}
+.proc__tab {
+  position: relative;
+  z-index: 1;
+  border: 0;
+  background: transparent;
+  color: var(--ink-soft);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 10px 24px;
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  transition: color 0.45s var(--ease);
+}
+.proc__tab.is-active {
+  color: var(--ink);
+}
+.proc__switch.is-ai .proc__tab.is-active {
+  color: #fff;
+}
+.proc__spark {
+  font-size: 0.8em;
+  transition: transform 0.5s var(--ease);
+}
+.proc__switch.is-ai .proc__tab[data-tab="ai"] .proc__spark {
+  transform: rotate(90deg) scale(1.15);
+}
+.proc__thumb {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  height: calc(100% - 10px);
+  width: 0;
+  border-radius: 999px;
+  background: var(--card);
+  box-shadow: 0 6px 16px -6px rgba(23, 19, 13, 0.28);
+  transition: transform 0.6s var(--ease), width 0.6s var(--ease),
+    background 0.6s var(--ease), box-shadow 0.6s var(--ease);
+}
+.proc__switch.is-ai .proc__thumb {
+  background: linear-gradient(100deg, #f5a524, #f472b6 42%, #818cf8 74%, #34d399);
+  box-shadow: 0 10px 24px -8px rgba(129, 140, 248, 0.6);
+}
+.proc__flow.is-super {
+  animation: super 0.7s var(--ease);
+}
+@keyframes super {
+  0%,
+  100% {
+    filter: brightness(1) saturate(1);
+  }
+  40% {
+    filter: brightness(1.06) saturate(1.3);
+  }
+}
+
+/* the single row of chips + thin connectors */
+.proc__flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0;
+}
+.proc__link {
+  flex: 0 0 auto;
+  width: clamp(14px, 2.4vw, 36px);
+  height: 1.5px;
+  background: var(--line);
+  transition: width 0.55s var(--ease), opacity 0.4s var(--ease);
+}
+.proc__link.is-hidden {
+  width: 0;
+  opacity: 0;
+}
+/* traditional carries 11 chips — tighten so the run stays on one line */
+.proc__flow.is-trad .chip {
+  font-size: 0.84rem;
+  padding: 9px 15px;
+}
+.proc__flow.is-trad .proc__link {
+  width: clamp(8px, 1.4vw, 20px);
+}
+
+.proc__link.is-hidden,
+.proc__flow.is-trad .proc__link.is-hidden {
+  width: 0;
+  opacity: 0;
+}
+
+/* collapsed away by the mode switch.
+   listed after the .is-trad sizing above so it wins the cascade */
+.chip.is-hidden,
+.proc__flow.is-trad .chip.is-hidden {
+  max-width: 0;
+  min-width: 0; /* flex items default to min-width:auto and refuse to collapse */
+  padding-left: 0;
+  padding-right: 0;
+  border-width: 0;
+  opacity: 0;
+  transform: scale(0.7);
+  pointer-events: none;
+}
+
+/* base chip — muted, outlined, no icon */
+.chip {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+  padding: 11px 22px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-mute);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.98rem;
+  white-space: nowrap;
+  max-width: 340px;
+  overflow: hidden;
+  transition: max-width 0.55s var(--ease), padding 0.55s var(--ease),
+    opacity 0.4s var(--ease), border-color 0.4s var(--ease),
+    transform 0.5s var(--ease);
+}
+
+/* the one highlighted, interactive step */
+.chip--hero {
+  position: relative;
+  cursor: pointer;
+  color: var(--ink);
+  border-color: transparent;
+  background: var(--card);
+  padding-left: 14px;
+  box-shadow: 0 10px 30px -12px rgba(129, 140, 248, 0.4);
+  transition: transform 0.5s var(--ease), box-shadow 0.5s var(--ease);
+}
+/* gradient ring */
+.chip--hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  padding: 1.5px;
+  background: linear-gradient(100deg, #6c5ce7, #f472b6 40%, #f5a524 72%, #34d399);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+.chip--hero:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 36px -12px rgba(129, 140, 248, 0.55);
+}
+.chip__star {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+}
+.chip__star svg {
+  width: 20px;
+  height: 20px;
+  animation: starpulse 2.6s var(--ease) infinite;
+  filter: drop-shadow(0 0 6px rgba(244, 114, 182, 0.45));
+}
+@keyframes starpulse {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.2) rotate(20deg); }
+}
+
+/* ---- hover list popover ---- */
+.pop {
+  position: absolute;
+  z-index: 30;
+  width: 340px;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+  pointer-events: none;
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+}
+.pop.is-on {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.pop__inner {
+  border-radius: 18px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  padding: 18px 20px 8px;
+  box-shadow: 0 26px 54px -26px rgba(23, 19, 13, 0.28);
+}
+.pop__eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-bottom: 12px;
+}
+.pop__list {
+  list-style: none;
+}
+.pop__list li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 11px 0;
+  border-top: 1px solid var(--line);
+}
+.pop__list li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+.pop__list li span {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--ink);
+}
+.pop__list li em {
+  font-style: normal;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+/* ============================================================
+   TECH STACK
+   ============================================================ */
+.stack {
+  padding: clamp(58px, 8vw, 104px) var(--edge);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(22px, 3vw, 36px);
+  border-top: 1px solid var(--line);
+}
+.stack__label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+.stack__list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(18px, 3vw, 40px);
+}
+.tool {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.tool__tile {
+  width: clamp(46px, 5vw, 60px);
+  aspect-ratio: 1;
+  border-radius: 14px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  padding: 21%;
+  background: var(--tile, #fff);
+  border: 1px solid rgba(23, 19, 13, 0.08);
+  box-shadow: 0 8px 22px -14px rgba(23, 19, 13, 0.5);
+  transition: transform 0.45s var(--ease), box-shadow 0.45s var(--ease);
+}
+/* marks that already bake their own background square into the art
+   (Jitter/Cursor/Codex) fill the tile edge to edge instead */
+.tool__tile--flush {
+  padding: 0;
+  border-width: 0; /* a transparent BORDER still reserves its width, insetting
+                       the image by 1px and letting the page show through */
+}
+.tool:hover .tool__tile {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 30px -14px rgba(23, 19, 13, 0.55);
+}
+.tool__tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.tool__tile--flush img {
+  object-fit: cover;
+}
+.tool__name {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--ink-mute);
+  transition: color 0.4s var(--ease);
+}
+.tool:hover .tool__name {
+  color: var(--ink);
+}
+
+/* ============================================================
+   ABOUT
+   ============================================================ */
+.about {
+  padding: clamp(56px, 8vw, 110px) var(--edge) clamp(64px, 9vw, 120px);
+  border-top: 1px solid var(--line);
+}
+
+/* ---- retro Macintosh window chrome ---- */
+.mac {
+  max-width: 1080px;
+  margin: 0 auto;
+  border: 1px solid var(--ink);
+  border-radius: 8px;
+  background: var(--card);
+  overflow: hidden;
+  box-shadow: 0 30px 70px -40px rgba(23, 19, 13, 0.45);
+}
+.mac__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--ink);
+  background: var(--paper-2);
+}
+.mac__title {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+.mac__btns {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+/* the classic square window controls, drawn as outlines rather than
+   the modern traffic-light dots */
+.mac__btn {
+  position: relative;
+  width: 17px;
+  height: 17px;
+  border: 1.5px solid var(--ink);
+  border-radius: 2px;
+}
+.mac__btn::before,
+.mac__btn::after {
+  content: "";
+  position: absolute;
+  background: var(--ink);
+}
+/* minimise: a single bar */
+.mac__btn--min::before {
+  left: 2px;
+  right: 2px;
+  top: 50%;
+  height: 1.5px;
+  transform: translateY(-50%);
+}
+/* maximise: a nested square */
+.mac__btn--max::before {
+  inset: 3px;
+  background: none;
+  border: 1.5px solid var(--ink);
+  border-radius: 1px;
+}
+/* close: an X */
+.mac__btn--close::before,
+.mac__btn--close::after {
+  left: 1px;
+  right: 1px;
+  top: 50%;
+  height: 1.5px;
+}
+.mac__btn--close::before {
+  transform: translateY(-50%) rotate(45deg);
+}
+.mac__btn--close::after {
+  transform: translateY(-50%) rotate(-45deg);
+}
+.mac__body {
+  padding: clamp(24px, 4vw, 52px) clamp(20px, 4vw, 56px);
+}
+
+/* avatar spans both rows beside the bio, with the desktop folders
+   tucked under the copy — a grid rather than a flex row so an opened
+   folder can be re-assigned to a full-width area (see below) */
+.about__inner {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    "avatar text"
+    "avatar folders";
+  /* every row is top-aligned in both states — the avatar must grow and
+     shrink anchored to its top-left corner, and re-centring it mid-
+     transition is what made the expand jitter */
+  align-items: start;
+  column-gap: clamp(24px, 5vw, 64px);
+  row-gap: 0;
+}
+.about__inner > .avatar {
+  grid-area: avatar;
+  justify-self: start;
+}
+.about__body {
+  grid-area: text;
+}
+.folders__grid {
+  grid-area: folders;
+}
+/* with a window open the avatar shrinks and anchors to the top beside
+   the copy, handing the whole width to the carousel below */
+.about__inner:has(.folder.is-open) {
+  grid-template-areas:
+    "avatar text"
+    "folders folders";
+}
+.about__inner:has(.folder.is-open) > .avatar {
+  width: clamp(88px, 11vw, 124px);
+}
+.avatar {
+  transition: width 0.45s var(--ease);
+}
+.about__text {
+  max-width: 54ch;
+  font-size: clamp(1rem, 1.25vw, 1.16rem);
+  line-height: 1.62;
+  color: var(--ink-soft);
+}
+
+/* ============================================================
+   WORKS  (full-width framed cases · lines)
+   ============================================================ */
+.works {
+  --stick: clamp(66px, 11vh, 116px);
+  padding: 0;
+}
+.works__list {
+  display: block;
+}
+
+/* each case pins full-bleed; the next slides up to cover it */
+.case {
+  position: sticky;
+  top: var(--stick);
+  background: var(--paper);
+  padding: 0 clamp(14px, 2.2vw, 40px);
+  transform-origin: center top;
+  will-change: transform;
+}
+.case__frame {
+  position: relative;
+  border: 1px solid var(--line);
+  padding: clamp(44px, 6vw, 84px) clamp(20px, 4vw, 60px) clamp(34px, 4vw, 58px);
+  min-height: clamp(500px, 78vh, 820px);
+  display: flex;
+  flex-direction: column;
+}
+.case__tick { position: absolute; width: 9px; height: 9px; z-index: 1; }
+.case__tick.tl { top:-1px; left:-1px; border-top:1px solid var(--ink); border-left:1px solid var(--ink); }
+.case__tick.tr { top:-1px; right:-1px; border-top:1px solid var(--ink); border-right:1px solid var(--ink); }
+.case__tick.bl { bottom:-1px; left:-1px; border-bottom:1px solid var(--ink); border-left:1px solid var(--ink); }
+.case__tick.br { bottom:-1px; right:-1px; border-bottom:1px solid var(--ink); border-right:1px solid var(--ink); }
+
+.case__body {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.case__logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: -0.01em;
+  color: var(--case-accent, var(--ink));
+}
+.case__logo::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  background: currentColor;
+}
+/* a real brand wordmark, when the project has one, instead of the
+   generic colour-dot + text lockup above */
+/* --logo-base is the treatment (wordmark vs square icon); --logo-scale
+   is a per-project nudge for marks whose own internal padding makes
+   them read small at the shared size. They multiply, so a project can
+   opt into a bigger mark without changing anyone else's. */
+.case__logo--img {
+  --logo-base: 36px;
+  height: calc(var(--logo-base) * var(--logo-scale, 1));
+  width: auto;
+  display: block;
+  transition: height 0.5s var(--ease);
+}
+/* a square icon mark reads much smaller than a wordmark at the same
+   height, so it gets its own base */
+.case__logo--img.case__logo--square {
+  --logo-base: 46px;
+}
+.case.is-expanded .case__logo--img {
+  --logo-base: 27px;
+}
+.case.is-expanded .case__logo--img.case__logo--square {
+  --logo-base: 36px;
+}
+.case__title {
+  font-family: var(--font-heavy);
+  font-weight: 400;
+  font-size: clamp(2.3rem, 8.5vw, 7rem);
+  line-height: 0.92;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin-top: clamp(16px, 2.4vw, 32px);
+}
+.case__tags {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: clamp(14px, 1.6vw, 22px);
+}
+.case__tags span {
+  font-family: "SK Modernist", var(--font-body), sans-serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-mute);
+}
+.case__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: clamp(22px, 2.6vw, 36px);
+  padding: 12px 24px;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: none;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.4s var(--ease), color 0.4s var(--ease),
+    padding 0.5s var(--ease), font-size 0.5s var(--ease), margin 0.5s var(--ease);
+}
+.case__cta i {
+  display: flex;
+  transition: transform 0.4s var(--ease);
+}
+.case__cta svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.case__cta:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+.case__cta:hover i {
+  transform: translateX(3px);
+}
+
+/* the only thing that stays pinned while a deep dive scrolls — a
+   separate element from the CTA, so the header itself is free to
+   scroll away normally */
+.case__back-wrap {
+  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding: clamp(16px, 2.4vw, 26px) clamp(20px, 4vw, 60px);
+  pointer-events: none;
+}
+.case.is-expanded .case__back-wrap {
+  display: block;
+}
+.case__back {
+  pointer-events: auto;
+  display: inline-flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--card);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+  cursor: pointer;
+  box-shadow: 0 10px 24px -14px rgba(23, 19, 13, 0.4);
+  transition: border-color 0.4s var(--ease), transform 0.4s var(--ease);
+}
+.case__back:hover {
+  border-color: var(--ink-mute);
+  transform: translateY(-1px);
+}
+.case__back i {
+  display: flex;
+  transition: transform 0.4s var(--ease);
+}
+.case__back svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.case__back:hover i {
+  transform: translateX(-3px);
+}
+
+.case .showcase {
+  width: 100%;
+  margin-top: clamp(16px, 2.2vw, 32px);
+}
+
+/* ---- mockups ---- */
+.showcase {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(16px, 2vw, 30px);
+  width: 100%;
+}
+.showcase--web {
+  flex-direction: column;
+}
+
+/* device: phone */
+.phone {
+  position: relative;
+  width: clamp(150px, 15vw, 210px);
+  aspect-ratio: 9 / 19;
+  border-radius: 30px;
+  background: #0d0b08;
+  padding: 8px;
+  box-shadow: 0 40px 70px -40px rgba(23, 19, 13, 0.7);
+  flex: 0 0 auto;
+  transition: transform 0.7s var(--ease);
+}
+.phone--back {
+  transform: rotate(-6deg) translateX(18px) scale(0.9);
+  opacity: 0.92;
+}
+.phone--front {
+  transform: rotate(3deg);
+  z-index: 2;
+}
+.case:hover .phone--back {
+  transform: rotate(-9deg) translateX(6px) scale(0.9);
+}
+.case:hover .phone--front {
+  transform: rotate(1deg) translateY(-6px);
+}
+.phone__screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 22px;
+  overflow: hidden;
+}
+.phone__notch {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 34%;
+  height: 14px;
+  border-radius: 999px;
+  background: #0d0b08;
+  z-index: 4;
+}
+
+/* device: browser */
+.browserframe {
+  width: 100%;
+  max-width: 640px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 40px 80px -46px rgba(23, 19, 13, 0.6);
+  transition: transform 0.7s var(--ease);
+}
+.case:hover .browserframe {
+  transform: translateY(-6px);
+}
+.browserframe__bar {
+  height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  background: #f1eee8;
+  border-bottom: 1px solid var(--line);
+}
+.browserframe__bar i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #d7d2c8;
+}
+.browserframe__bar span {
+  margin-left: 12px;
+  height: 14px;
+  flex: 1;
+  max-width: 240px;
+  border-radius: 999px;
+  background: #e3ded4;
+}
+.browserframe__screen {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+}
+
+/* bigger mockups for the deep-dive story */
+.showcase--big .phone {
+  width: clamp(190px, 20vw, 280px);
+}
+.showcase--big .browserframe {
+  max-width: 760px;
+}
+
+.showcase--hero {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+/* the white "matte" card: padding/border/shadow, plus the reveal-tilt
+   transform — the transform lives here, on the outer card, never on the
+   image. A transformed parent carries its whole rendered subtree (the
+   image and its own inner border included) as one rigid unit, so the
+   two borders can never drift out of sync the way a separately
+   animated inner layer did. */
+.showcase--hero__card {
+  box-sizing: border-box;
+  width: min(1000px, 96%);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: clamp(8px, 1.1vw, 12px);
+  box-shadow: 0 22px 50px -30px rgba(23, 19, 13, 0.38);
+  --hero-tilt: 48deg;
+  --hero-scale: 0.92;
+  transform: perspective(1400px) rotateX(var(--hero-tilt)) scale(var(--hero-scale));
+  transform-origin: 50% 100%;
+  opacity: 0;
+  transition: transform 1000ms var(--ease), opacity 700ms ease, width 1000ms var(--ease);
+}
+/* the full screenshot, uncropped — a second, thinner border sits
+   directly on it, inset from the card's own border by the card's
+   padding, like a photo behind a mat */
+.showcase--hero__card img {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+/* scrolled into view: lies flat like a tablet on a table, then rises
+   upright — see initHeroReveal() in works.js, which adds this class
+   once via IntersectionObserver and never removes it */
+.showcase--hero.is-revealed .showcase--hero__card {
+  --hero-tilt: 0deg;
+  --hero-scale: 1;
+  opacity: 1;
+}
+.case.is-expanded .showcase--hero {
+  align-items: flex-start;
+}
+.case.is-expanded .showcase--hero__card {
+  width: min(1100px, 92%);
+  --hero-tilt: 0deg;
+  --hero-scale: 1;
+  opacity: 1;
+}
+/* Opening or closing a deep dive must NOT replay the scroll reveal — the
+   reader already watched it rise on the home page. Both states change
+   the card's pose (tilt + width) while it is faded out by the deep-dive
+   crossfade, so those changes are applied instantly rather than tweened;
+   otherwise the tilt animates back in behind the fade and reads as the
+   reveal firing a second time. */
+.case.is-expanded .showcase--hero__card,
+.case.is-settling .showcase--hero__card {
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .showcase--hero__card {
+    --hero-tilt: 0deg;
+    --hero-scale: 1;
+    opacity: 1;
+    transition: none;
+  }
+}
+
+/* ============================================================
+   DEEP DIVE
+   a case card expands into a genuinely separate-feeling page: fixed,
+   full-viewport, its own scroll, the site nav covered — no route, no
+   page load, but nothing of the gallery stays visible behind it.
+   ============================================================ */
+
+/* siblings tucked away while one case is expanded */
+.case.is-hidden {
+  height: 0;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* the expanded case becomes the whole viewport — a "new page" that
+   happens to be built from the same card, with its own internal scroll */
+.case.is-expanded {
+  position: fixed;
+  inset: 0;
+  z-index: 500; /* above .nav (80) — the site nav is fully covered */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--paper);
+}
+/* the header itself is NOT pinned — it scrolls away with the rest of
+   the page, only .case__back-wrap above stays put */
+.case.is-expanded .case__frame {
+  position: relative;
+  z-index: 1;
+  min-height: 0;
+  padding: clamp(8px, 1.4vw, 16px) clamp(20px, 4vw, 60px) clamp(20px, 2.6vw, 28px);
+  background: var(--paper);
+}
+/* the graphic shrinks a little and the frame gets shorter — the
+   headline itself stays big and confident, just not full-hero size */
+.case.is-expanded .case__title {
+  font-size: clamp(2.1rem, 5.2vw, 4.4rem);
+  margin-top: clamp(10px, 1.6vw, 20px);
+}
+.case.is-expanded .case__tags {
+  margin-top: clamp(10px, 1.4vw, 16px);
+}
+.case.is-expanded .case__cta {
+  display: none; /* replaced by the pinned .case__back above */
+}
+.case.is-expanded .showcase {
+  margin-top: clamp(20px, 3vw, 36px);
+}
+.case.is-expanded .phone {
+  width: clamp(120px, 12vw, 165px);
+}
+.case.is-expanded .browserframe {
+  max-width: 460px;
+}
+
+/* the story itself: sections stacked vertically, no labels — each
+   one is a beat, not a spec sheet */
+.case__story {
+  position: relative;
+  z-index: 1;
+  background: var(--paper);
+}
+
+.story__meta {
+  display: grid;
+  grid-template-columns: 0.7fr 0.9fr 1.6fr;
+  max-width: var(--maxw);
+  margin: clamp(40px, 6vw, 64px) auto 0;
+  padding: 0 var(--edge);
+  border: 1px solid var(--line);
+  background: var(--paper);
+}
+.story__meta-item {
+  padding: clamp(20px, 3vw, 32px) clamp(20px, 4vw, 44px);
+  border-left: 1px solid var(--line);
+}
+.story__meta-item:first-child {
+  border-left: 0;
+}
+.story__meta-item span {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-bottom: 6px;
+}
+.story__meta-item strong {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--ink);
+}
+.story__meta-item--overview p {
+  font-size: clamp(0.92rem, 1.15vw, 1.02rem);
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.story__section {
+  padding: clamp(56px, 9vw, 120px) clamp(20px, 4vw, 60px);
+}
+.story__section--alt {
+  background: var(--paper-2);
+}
+.story__statement {
+  max-width: 22ch;
+  margin: 0 auto;
+  text-align: center;
+  font-family: var(--font-heavy);
+  font-weight: 400;
+  font-size: clamp(1.7rem, 4.4vw, 3.1rem);
+  line-height: 1.16;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+}
+
+.story__mockups {
+  padding: clamp(60px, 9vw, 120px) clamp(20px, 4vw, 60px);
+  display: flex;
+  justify-content: center;
+}
+
+/* a narrative paragraph, as opposed to .story__statement's punchy
+   one-liner — used by media-text/bento story sections */
+.story__paragraph {
+  max-width: 50ch;
+  font-size: clamp(1rem, 1.25vw, 1.15rem);
+  line-height: 1.62;
+  color: var(--ink-soft);
+}
+/* keep a lone word off the last line of long running copy */
+.story__paragraph,
+.about__text,
+.section-lead {
+  text-wrap: pretty;
+}
+/* short, centred blocks get `balance` instead: `pretty` only rescues a
+   single-word last line, and these were still stranding pairs like
+   "landing page." / "of features." — balancing evens every line so no
+   stub is left at the bottom at all */
+.story__paragraph--center,
+.story__statement,
+.story__meta-item--overview p {
+  text-wrap: balance;
+}
+.story__paragraph--center {
+  max-width: 56ch;
+  margin: 0 auto clamp(36px, 5vw, 56px);
+  text-align: center;
+}
+
+.story__media-row {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: clamp(32px, 5vw, 72px);
+}
+.story__media-row--right {
+  flex-direction: row-reverse;
+}
+/* the text half of a media row — wraps the optional eyebrow with the
+   paragraph so they stay a single flex child */
+.story__media-copy {
+  flex: 1 1 50%;
+  min-width: 0;
+}
+.story__media-label {
+  text-align: left;
+  margin-bottom: 0.9rem;
+}
+.story__media {
+  flex: 1 1 50%;
+  min-width: 0;
+}
+/* white matte card, plus a second thinner border directly on the image
+   itself — same double-border treatment as the hero card */
+.story__media-card {
+  box-sizing: border-box;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: clamp(6px, 0.9vw, 10px);
+  box-shadow: 0 22px 50px -30px rgba(23, 19, 13, 0.32);
+}
+.story__media-card img,
+.story__media-card video {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.story__media--stack {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(14px, 2vw, 22px);
+}
+/* three-up: one full-width above a matched pair. All three share an
+   aspect ratio, so the bottom pair lines up on its own — no crop. */
+.story__media--trio {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(12px, 1.6vw, 18px);
+}
+.story__media--trio .story__media-card:first-child {
+  grid-column: 1 / -1;
+}
+/* a 2x2 grid instead of a vertical stack, for sections that want their
+   media to read as a bento arrangement rather than a single column. A
+   bento's cells aren't meant to be uniform — rows size to their tallest
+   card (default grid stretch), and each card's own media crops via
+   object-fit to fill whatever height that gives it, rather than either
+   forcing every card to match (looks stretched) or leaving a blank gap
+   under shorter media (looks broken). */
+.story__media--bento {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(12px, 1.6vw, 18px);
+}
+.story__media--bento .story__media-card {
+  display: flex;
+}
+.story__media--bento .story__media-card img,
+.story__media--bento .story__media-card video {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  /* contain, not cover — the card can stretch to fill its grid cell,
+     but the media's own aspect ratio stays locked and nothing crops */
+  object-fit: contain;
+}
+
+/* a metrics band — big numbers separated by hairline rules, in the same
+   line-based language as the meta row rather than a filled panel */
+.story__stats-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  text-align: center;
+  margin-bottom: 1.1rem;
+}
+.story__stats {
+  max-width: var(--maxw);
+  margin: clamp(36px, 5vw, 56px) auto 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--line);
+}
+.story__stat {
+  padding: clamp(28px, 4vw, 48px) clamp(12px, 2vw, 24px);
+  text-align: center;
+  border-left: 1px solid var(--line);
+}
+.story__stat:first-child {
+  border-left: 0;
+}
+.story__stat strong {
+  display: block;
+  font-family: var(--font-heavy);
+  font-weight: 400;
+  font-size: clamp(2.4rem, 5.5vw, 4.2rem);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--case-accent, var(--ink));
+}
+.story__stat span {
+  display: block;
+  margin-top: 0.7rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.story__stats-note {
+  margin-top: clamp(36px, 5vw, 56px);
+  margin-bottom: 0;
+}
+@media (max-width: 760px) {
+  .story__stats {
+    grid-template-columns: 1fr 1fr;
+  }
+  .story__stat:nth-child(odd) {
+    border-left: 0;
+  }
+  .story__stat:nth-child(n + 3) {
+    border-top: 1px solid var(--line);
+  }
+}
+
+.story__bento-grid {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(14px, 2vw, 22px);
+}
+/* rows of 2/3/2 (see storyBodyMarkup's 7-item case) — every tile in a
+   row is equal width, so as long as the source images share an aspect
+   ratio, rows match height on their own: no stretching, no crop, no
+   letterboxing, just each image at its natural size. */
+.story__bento-grid--rows {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(14px, 2vw, 22px);
+}
+.story__bento-row {
+  display: flex;
+  gap: clamp(14px, 2vw, 22px);
+}
+.story__bento-row .story__bento-card {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.story__bento-card {
+  box-sizing: border-box;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: clamp(6px, 0.9vw, 10px);
+  box-shadow: 0 22px 50px -30px rgba(23, 19, 13, 0.32);
+}
+.story__bento-card img,
+.story__bento-card video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1696 / 943;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.story__bento-img--1 {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 760px) {
+  .story__media-row,
+  .story__media-row--right {
+    flex-direction: column;
+  }
+  .story__bento-grid,
+  .story__media--bento,
+  .story__media--trio {
+    grid-template-columns: 1fr;
+  }
+  .story__bento-img--1,
+  .story__bento-span-2,
+  .story__media--trio .story__media-card:first-child {
+    grid-column: auto;
+  }
+}
+
+.story__more {
+  padding: clamp(40px, 6vw, 70px) 0 0;
+  border-top: 1px solid var(--line);
+}
+.story__more-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  padding: 0 clamp(20px, 4vw, 60px);
+  margin-bottom: clamp(8px, 1.4vw, 16px);
+}
+.story__rows {
+  display: flex;
+  flex-direction: column;
+}
+
+/* one full-width row per project: logo · title · tilted mockup · cta */
+.story__row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 3vw, 40px);
+  width: 100%;
+  padding: clamp(20px, 3.2vw, 34px) clamp(20px, 4vw, 60px);
+  /* it's a <button> — reset the browser's default border on every side
+     before applying just the hairline top divider, or the UA default
+     (thick, dark) shows through on the sides this doesn't set */
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  overflow: visible;
+  text-align: left;
+  transition: background 0.4s var(--ease);
+}
+.story__row:last-child {
+  border-bottom: 1px solid var(--line);
+}
+.story__row:hover {
+  background: var(--paper-2);
+}
+.story__row-logo {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--case-accent, var(--ink));
+}
+.story__row-logo::before {
+  content: "";
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  background: currentColor;
+}
+/* a real wordmark image replaces the colour-dot + text lockup */
+.story__row-logo.has-img::before {
+  content: none;
+}
+.story__row-logo.has-img img {
+  --logo-base: 22px;
+  height: calc(var(--logo-base) * var(--logo-scale, 1));
+  width: auto;
+  display: block;
+}
+/* a square icon mark reads much smaller than a wordmark at the same
+   height, so it gets its own base — same rule as the case cards */
+.story__row-logo.has-img.is-square img {
+  --logo-base: 34px;
+}
+.story__row-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--font-heavy);
+  font-weight: 400;
+  font-size: clamp(1.4rem, 3.2vw, 2.4rem);
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.story__row-cta {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  white-space: nowrap;
+  transition: background 0.4s var(--ease), color 0.4s var(--ease);
+}
+.story__row-cta svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.story__row:hover .story__row-cta {
+  background: var(--ink);
+  color: var(--paper);
+}
+/* staggered reveal once the header FLIP settles */
+[data-story-in] {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+}
+.case__story.is-in [data-story-in] {
+  opacity: 1;
+  transform: none;
+}
+.case__story.is-in [data-story-in]:nth-of-type(1) {
+  transition-delay: 0.05s;
+}
+.case__story.is-in [data-story-in]:nth-of-type(2) {
+  transition-delay: 0.12s;
+}
+.case__story.is-in [data-story-in]:nth-of-type(3) {
+  transition-delay: 0.19s;
+}
+.case__story.is-in [data-story-in]:nth-of-type(4) {
+  transition-delay: 0.26s;
+}
+.case__story.is-in [data-story-in]:nth-of-type(5) {
+  transition-delay: 0.32s;
+}
+
+@media (max-width: 700px) {
+  .story__meta {
+    grid-template-columns: 1fr;
+  }
+  .story__meta-item {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+  .story__meta-item:first-child {
+    border-top: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-story-in] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ============================================================
+   FOLDERS  ("beyond the work" — volunteer / speaking / artwork)
+   ============================================================ */
+/* desktop icons sitting under the bio copy, not full-width cards —
+   auto-width columns so they cluster at the left like a Finder window */
+.folders__grid {
+  margin-top: clamp(24px, 3vw, 36px);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 132px));
+  gap: clamp(10px, 1.4vw, 18px);
+  align-items: start;
+}
+/* the icon columns are only ~132px wide, which would cap the opened
+   window too — collapse to a single full-width track while one is open */
+.folders__grid:has(.folder.is-open) {
+  grid-template-columns: 1fr;
+}
+
+/* ---- closed: a plain desktop icon ---- */
+.folder {
+  position: relative;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 8px 6px 10px;
+  border-radius: 6px;
+  transition: background 0.3s var(--ease);
+}
+.folder:hover {
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+}
+/* corner ticks belong to the opened panel's frame, not the icon */
+.folder__tick {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+  transition: width 0.5s var(--ease), height 0.5s var(--ease),
+    opacity 0.4s var(--ease);
+}
+.folder__tick.tl { top: -1px; left: -1px; border-top: 1px solid var(--ink); border-left: 1px solid var(--ink); }
+.folder__tick.tr { top: -1px; right: -1px; border-top: 1px solid var(--ink); border-right: 1px solid var(--ink); }
+.folder__tick.bl { bottom: -1px; left: -1px; border-bottom: 1px solid var(--ink); border-left: 1px solid var(--ink); }
+.folder__tick.br { bottom: -1px; right: -1px; border-bottom: 1px solid var(--ink); border-right: 1px solid var(--ink); }
+
+.folder__head {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transition: gap 0.5s var(--ease);
+}
+.folder__icon {
+  position: relative;
+  width: 62px;
+  height: 57px;
+  border: 0;
+  padding: 0;
+  background: none;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  color: var(--ink);
+  cursor: pointer;
+  flex: 0 0 auto;
+  transition: transform 0.4s var(--ease), background 0.4s var(--ease);
+}
+.folder:hover .folder__icon {
+  transform: translateY(-2px);
+}
+/* the manila folder image and the minimize glyph are stacked in the same
+   box and crossfaded by .is-open — no DOM swap mid-animation */
+.folder__icon-img,
+.folder__icon-glyph {
+  grid-area: 1 / 1;
+  transition: opacity 0.25s var(--ease);
+}
+.folder__icon-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.folder__icon-glyph {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+  opacity: 0;
+}
+.folder__icon.is-open .folder__icon-img {
+  opacity: 0;
+}
+.folder__icon.is-open .folder__icon-glyph {
+  opacity: 1;
+}
+.folder__labels {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+}
+.folder__label {
+  font-weight: 600;
+  font-size: 0.84rem;
+  line-height: 1.25;
+  color: var(--ink);
+}
+/* the hint is desktop-icon clutter when closed — it only earns its
+   space once the folder is open and titling the panel */
+.folder__hint {
+  display: none;
+  font-size: 0.8rem;
+  color: var(--ink-mute);
+}
+
+/* siblings tucked away while one folder is open */
+.folder.is-hidden {
+  display: none;
+}
+
+/* ---- open: the icon becomes a Macintosh window. It spans the full grid
+   row and breaks out of the narrow icon columns, but stays in flow —
+   never a full-page takeover ---- */
+.folder.is-open {
+  position: relative;
+  grid-column: 1 / -1;
+  /* the icon grid's columns are only ~132px wide; the opened window wants
+     the whole body width, so it escapes to the row's full measure */
+  width: 100%;
+  height: 50vh;
+  min-height: 320px;
+  max-height: 580px;
+  z-index: 5;
+  padding: 0;
+  border: 1px solid var(--ink);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--card);
+  cursor: default;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+.folder.is-open:hover {
+  background: var(--card);
+}
+.folder.is-open .folder__tick {
+  width: 22px;
+  height: 22px;
+  opacity: 0;
+}
+/* the head becomes the window's title bar */
+.folder.is-open .folder__head {
+  flex-direction: row-reverse;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--ink);
+  background: var(--paper-2);
+}
+.folder.is-open .folder__labels {
+  align-items: flex-start;
+  text-align: left;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 10px;
+}
+.folder.is-open .folder__label {
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+.folder.is-open .folder__hint {
+  display: block;
+  font-size: 0.8rem;
+}
+/* the folder image gives way to the minimize control, sized like the
+   window buttons in the About chrome */
+.folder.is-open .folder__icon {
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid var(--ink);
+  border-radius: 2px;
+  background: none;
+}
+.folder.is-open .folder__icon-glyph {
+  width: 13px;
+  height: 13px;
+}
+.folder.is-open .folder__icon:hover {
+  background: var(--ink);
+  color: var(--paper);
+  transform: none;
+}
+
+/* ---- the auto-scrolling filmstrip ---- */
+.folder__strip {
+  display: none;
+  flex: 1 1 auto;
+  min-height: 0;
+  align-items: center;
+  /* the tilted photos' rotated top corners need real clearance too, not
+     just the shadow-driven bottom gap — too little here clips them flat
+     against the strip's overflow:hidden edge */
+  padding: clamp(32px, 4.5vw, 52px) 0 clamp(56px, 7vw, 96px);
+  overflow: hidden;
+  background-image: radial-gradient(var(--line) 1px, transparent 1px);
+  background-size: 26px 26px;
+  opacity: 0;
+  transition: opacity 0.6s var(--ease-out) 0.1s;
+  cursor: grab;
+  touch-action: pan-y;
+}
+.folder__strip.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+.folder.is-open .folder__strip {
+  display: flex;
+}
+/* square frames (Artworks) are ~33% taller than the 4:3 default at the
+   same width, so the panel needs more headroom to keep them from
+   clipping against the strip's top edge */
+.folder[data-folder-id="artworks"].folder.is-open {
+  min-height: 500px;
+}
+.folder[data-folder-id="artworks"] .folder__strip {
+  padding-top: clamp(64px, 8.5vw, 92px);
+}
+.folder.is-open.is-in .folder__strip {
+  opacity: 1;
+}
+.folder__track {
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 1.6vw, 20px);
+  width: max-content;
+  padding: 0 20px;
+  will-change: transform;
+}
+.folder__photo {
+  flex: 0 0 auto;
+  transform: translateY(var(--drift, 0px)) rotate(var(--rot, 0deg));
+}
+.folder__photo-frame {
+  width: clamp(220px, 24vw, 340px);
+  background: #fff;
+  padding: 14px 14px 0;
+  border-radius: 14px;
+  /* a hairline outer edge on the white mat, so the frame still reads
+     against the light strip background — matches the inner border the
+     photos already carry */
+  border: 1px solid var(--line);
+  box-shadow: 0 34px 60px -30px rgba(23, 19, 13, 0.45), 0 6px 14px -8px rgba(23, 19, 13, 0.25);
+}
+.folder__photo-frame:not(.has-img)::before {
+  content: "";
+  display: block;
+  aspect-ratio: 4 / 3;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--tint), color-mix(in srgb, var(--tint) 35%, #fff));
+}
+/* real photos have no figcaption to supply the polaroid's bottom strip,
+   so the frame needs its own — slightly tighter than the default
+   top/side padding, not the full caption-sized gap */
+.folder__photo-frame.has-img {
+  padding: 10px 10px 14px;
+}
+.folder__photo-frame.has-img img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 8px;
+  object-fit: cover;
+  /* inset so it doesn't affect the box's own size/aspect-ratio */
+  box-shadow: inset 0 0 0 1px var(--line);
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+/* the Artworks folder's photos read better square, not 4:3 */
+.folder[data-folder-id="artworks"] .folder__photo-frame.has-img img {
+  aspect-ratio: 1 / 1;
+}
+.folder__photo-frame figcaption {
+  padding: 12px 6px 18px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+/* shared by the folders overlay and the deep-dive overlay.
+   locks <html> too — <body>{overflow:hidden} alone doesn't reliably
+   block root-element scrolling in every browser */
+html:has(body.no-scroll) {
+  overflow: hidden;
+}
+body.no-scroll {
+  overflow: hidden;
+}
+
+/* the bio itself stacks at 900px (see below); the icons stay side by
+   side either way — they're small — just centred to match */
+@media (max-width: 900px) {
+  .folders__grid {
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .folder,
+  .folder__icon,
+  .folder__tick,
+  .folder__labels,
+  .folder__strip {
+    transition: none !important;
+  }
+}
+
+/* ============================================================
+   FOOTER  (clean · lined)
+   ============================================================ */
+.footer {
+  position: relative;
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 0;
+  border-top: 1px solid var(--line);
+}
+.footer__inner {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: clamp(56px, 8vw, 110px) var(--edge) clamp(28px, 3.5vw, 44px);
+}
+/* sits above the "open to collaborations" label inside the framed bar */
+.footer__place {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 0.7rem;
+  color: var(--ink-mute);
+  font-size: 0.92rem;
+}
+.footer__place .ic {
+  width: 16px;
+  height: 16px;
+}
+
+/* framed collab / socials bar */
+.footer__frame {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--line);
+}
+.footer__tick {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  z-index: 1;
+}
+.footer__tick.tl { top: -1px; left: -1px; border-top: 1px solid var(--ink); border-left: 1px solid var(--ink); }
+.footer__tick.tr { top: -1px; right: -1px; border-top: 1px solid var(--ink); border-right: 1px solid var(--ink); }
+.footer__tick.bl { bottom: -1px; left: -1px; border-bottom: 1px solid var(--ink); border-left: 1px solid var(--ink); }
+.footer__tick.br { bottom: -1px; right: -1px; border-bottom: 1px solid var(--ink); border-right: 1px solid var(--ink); }
+.footer__col {
+  padding: clamp(26px, 4vw, 46px);
+}
+.footer__col--right {
+  border-left: 1px solid var(--line);
+}
+.footer__label {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.02rem;
+  color: var(--ink-mute);
+  margin-bottom: 1.25rem;
+}
+.footer__mail {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px 11px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: border-color 0.4s var(--ease), transform 0.4s var(--ease);
+}
+.footer__mail:hover {
+  border-color: var(--ink-mute);
+  transform: translateY(-1px);
+}
+.footer__mail:active {
+  transform: translateY(0) scale(0.99);
+}
+/* icon swaps copy -> tick once the address is on the clipboard */
+.footer__mail-ico {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+.footer__mail .ic {
+  position: absolute;
+  inset: 0;
+  width: 16px;
+  height: 16px;
+  color: var(--ink-mute);
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+}
+.footer__mail .ic--done {
+  color: var(--green);
+  opacity: 0;
+  transform: scale(0.6);
+}
+.footer__mail.is-copied .ic--copy {
+  opacity: 0;
+  transform: scale(0.6);
+}
+.footer__mail.is-copied .ic--done {
+  opacity: 1;
+  transform: none;
+}
+/* "Copied!" — bare orange type that lifts and fades out, rather than a
+   persistent tooltip pill. Shared by every [data-copy] control. */
+.copied-flag {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 2px);
+  transform: translate(-50%, 4px);
+  color: var(--coral);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+}
+.is-copied .copied-flag {
+  animation: copied-pop 1.5s var(--ease-out) forwards;
+}
+@keyframes copied-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 4px);
+  }
+  18% {
+    opacity: 1;
+    transform: translate(-50%, -4px);
+  }
+  70% {
+    opacity: 1;
+    transform: translate(-50%, -6px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -14px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .is-copied .copied-flag {
+    animation: none;
+    opacity: 1;
+    transform: translate(-50%, -4px);
+  }
+}
+.footer__socials {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.footer__ico {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: background 0.4s var(--ease), color 0.4s var(--ease),
+    border-color 0.4s var(--ease), transform 0.4s var(--ease);
+}
+.footer__ico:hover {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+  transform: translateY(-2px);
+}
+.footer__ico .ic {
+  width: 18px;
+  height: 18px;
+}
+.footer__bar {
+  margin-top: clamp(30px, 4vw, 48px);
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 0.82rem;
+  color: var(--ink-mute);
+}
+.footer__made {
+  font-style: italic;
+  font-family: var(--font-display);
+}
+
+/* ============================================================
+   REVEAL ANIMATIONS
+   ============================================================ */
+[data-reveal],
+.reveal-line {
+  opacity: 0;
+  transform: translateY(22px);
+  filter: blur(6px);
+}
+.is-in [data-reveal],
+[data-reveal].is-in,
+.reveal-line.is-in {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  transition: opacity 0.9s var(--ease-out), transform 0.9s var(--ease-out),
+    filter 0.9s var(--ease-out);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 900px) {
+  .nav__links {
+    display: none;
+  }
+  .footer__frame {
+    grid-template-columns: 1fr;
+  }
+  .footer__col--right {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+  .about__inner {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+  }
+  .about__text {
+    margin-inline: auto;
+  }
+}
+
+@media (max-width: 560px) {
+  .nav__inner {
+    grid-template-columns: auto 1fr;
+  }
+  .nav__socials {
+    gap: 2px;
+  }
+  .phone--back {
+    display: none;
+  }
+  .footer__bar {
+    flex-direction: column;
+    text-align: center;
+    gap: 14px;
+  }
+  /* let the headline wrap naturally rather than on the desktop break */
+  .hero__title br {
+    display: none;
+  }
+  .chip {
+    font-size: 0.86rem;
+    padding: 9px 16px;
+  }
+  .proc__link {
+    width: 12px;
+  }
+  .pop {
+    width: min(300px, 84vw);
+  }
+  /* the CTA becomes icon-only so the row title has room to breathe */
+  .story__row-cta span {
+    display: none;
+  }
+  .story__row-cta {
+    padding: 10px;
+  }
+  .story__row-title {
+    font-size: clamp(1.1rem, 5.4vw, 1.6rem);
+  }
+  .case__frame {
+    min-height: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

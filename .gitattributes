@@ -1,0 +1,19 @@
+# Normalise line endings. Without this, committing from Windows stores CRLF
+# and Linux CI (Vercel) sees whole files as changed — noisy diffs and the
+# occasional tooling failure.
+* text=auto eol=lf
+
+# Binary assets: never touch these
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.mp4 binary
+*.webm binary
+*.mov binary
+*.woff binary
+*.woff2 binary
+*.otf binary
+*.ttf binary
+*.riv binary
