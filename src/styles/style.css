@@ -859,18 +859,24 @@ a {
 }
 
 /* ---- stacked deck ----
-   Collapsed, every tool slides toward the centre and overlaps into a pile,
-   fanned by a small rotation. Only transform/opacity animate, so the row
-   never reflows the page as it opens and closes. `--i` is each tool's
-   signed offset from the middle card (set in tools.js). */
+   Collapsed, every tool travels to the centre and overlaps into a pile,
+   fanned by a small rotation. `--dx`/`--dy` are measured per tool in
+   tools.js from its real position, which is what makes this survive the
+   list wrapping to several rows on narrow screens; `--i` (signed offset
+   from the middle card) only drives the fan spread and rotation.
+
+   Layout is deliberately untouched here — the pile is pure transform, so
+   the measurements stay valid and nothing reflows mid-animation. Only the
+   container's height collapses, to a single row. */
 .stack__list.is-stacked {
-  gap: 0;
+  height: var(--deck-h, auto);
 }
 .stack__list.is-stacked .tool {
-  /* pull each tile back toward the middle: the further from centre, the
-     further it travels, which is what collapses the row into one pile */
-  transform: translateX(calc(var(--i) * -1 * (100% + var(--fan-gap, 34px))))
-    translateX(calc(var(--i) * 26px)) rotate(calc(var(--i) * 2deg));
+  transform: translate(
+      calc(var(--dx, 0) * 1px + var(--i) * var(--deck-step, 26px)),
+      calc(var(--dy, 0) * 1px)
+    )
+    rotate(calc(var(--i) * 2deg));
   z-index: var(--z);
 }
 .stack__list.is-stacked .tool__name {
@@ -881,8 +887,16 @@ a {
 }
 .stack__list.is-stacked:hover .tool {
   /* a small spread on hover, hinting the pile is openable */
-  transform: translateX(calc(var(--i) * -1 * (100% + var(--fan-gap, 34px))))
-    translateX(calc(var(--i) * 33px)) rotate(calc(var(--i) * 3deg));
+  transform: translate(
+      calc(var(--dx, 0) * 1px + var(--i) * calc(var(--deck-step, 26px) + 7px)),
+      calc(var(--dy, 0) * 1px)
+    )
+    rotate(calc(var(--i) * 3deg));
+}
+/* while re-measuring we flip the class off and on in one frame — never
+   animate that */
+.stack__list.is-measuring .tool {
+  transition: none;
 }
 
 .tool {
@@ -2202,10 +2216,7 @@ a {
   flex: 1 1 auto;
   min-height: 0;
   align-items: center;
-  /* the tilted photos' rotated top corners need real clearance too, not
-     just the shadow-driven bottom gap — too little here clips them flat
-     against the strip's overflow:hidden edge */
-  padding: clamp(32px, 4.5vw, 52px) 0 clamp(56px, 7vw, 96px);
+  padding: 0;
   overflow: hidden;
   background-image: radial-gradient(var(--line) 1px, transparent 1px);
   background-size: 26px 26px;
@@ -2226,9 +2237,6 @@ a {
    clipping against the strip's top edge */
 .folder[data-folder-id="artworks"].folder.is-open {
   min-height: 500px;
-}
-.folder[data-folder-id="artworks"] .folder__strip {
-  padding-top: clamp(64px, 8.5vw, 92px);
 }
 .folder.is-open.is-in .folder__strip {
   opacity: 1;
@@ -2607,6 +2615,11 @@ body.no-scroll {
   /* let the headline wrap naturally rather than on the desktop break */
   .hero__title br {
     display: none;
+  }
+  /* a 26px step across nine cards nearly fills a phone's width, which
+     reads as a squashed row rather than a pile — tighten the cascade */
+  .stack__list {
+    --deck-step: 12px;
   }
   /* the tags wrap to several rows on a phone; the desktop line-height
      and 18px gap left them looking loosely stacked */

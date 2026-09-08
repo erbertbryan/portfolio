@@ -47,6 +47,48 @@ export function initTools() {
     root.appendChild(li);
   });
 
+  const items = [...root.children];
+
+  /* How far each tool has to travel to reach the pile, measured from its
+     real laid-out position rather than derived from index × width. The
+     list wraps on narrow screens, so anything that assumes one unbroken
+     row throws the wrapped items across the page.
+
+     Measured in the expanded state — the stacked state only ever applies
+     transforms, never changes layout, so these stay valid. */
+  const measure = () => {
+    const stacked = root.classList.contains("is-stacked");
+    root.classList.add("is-measuring"); // suppress transitions while we flip
+    root.classList.remove("is-stacked");
+
+    const box = root.getBoundingClientRect();
+    const cx = box.left + box.width / 2;
+    const rects = items.map((li) => li.getBoundingClientRect());
+    const firstRowTop = Math.min(...rects.map((r) => r.top));
+    const rowHeight = Math.max(
+      ...rects.filter((r) => r.top === firstRowTop).map((r) => r.height)
+    );
+
+    items.forEach((li, i) => {
+      const r = rects[i];
+      li.style.setProperty("--dx", (cx - (r.left + r.width / 2)).toFixed(1));
+      li.style.setProperty("--dy", (firstRowTop - r.top).toFixed(1));
+    });
+    // collapse the section to a single row's height while piled, so a
+    // wrapped list doesn't leave rows of empty space under the deck
+    root.style.setProperty("--deck-h", `${Math.round(rowHeight)}px`);
+
+    if (stacked) root.classList.add("is-stacked");
+    void root.offsetWidth; // commit before transitions come back
+    root.classList.remove("is-measuring");
+  };
+
+  measure();
+  window.addEventListener("resize", () => {
+    clearTimeout(root._measureTimer);
+    root._measureTimer = setTimeout(measure, 150);
+  });
+
   /* Click the pile to fan the tools out, click again to stack them back.
      The stacked state is the initial one, so the section reads as a single
      object until someone asks to see inside it. */
