@@ -2073,8 +2073,15 @@ a {
      to force the crop — at a narrow viewport that overshoots the actual
      screen edge, not just the frame, forcing a page-wide horizontal
      scrollbar (confirmed: 13px of real scroll on a 375px width). Nothing
-     here needs to bleed at this size in the first place. */
-  .showcase--hero__card {
+     here needs to bleed at this size in the first place.
+     .case.is-expanded .showcase--hero__card is listed separately, not
+     folded into the plain selector above, because two classes beat one
+     on specificity — the deep-dive's own 140% rule would otherwise keep
+     winning here regardless of source order, which is exactly how this
+     shipped broken the first time (capped the closed card, missed the
+     expanded one, and the expanded one is what a deep-dive page shows). */
+  .showcase--hero__card,
+  .case.is-expanded .showcase--hero__card {
     width: min(1000px, 96%);
   }
 }
