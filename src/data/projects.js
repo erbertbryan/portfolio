@@ -209,7 +209,8 @@ export const projects = [
   {
     id: "smash",
     layout: "hero", // one large screenshot, deliberately cropped by the frame
-    logo: "Smash Hub", // text mark — no vector supplied yet
+    logo: "Smash Hub",
+    logoSvg: "/brand/logos/smash.svg",
     // the product's own wordmark is two words; "SMASHHUB" set as one
     // collides on the double H at display size
     name: "Smash Hub",
