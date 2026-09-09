@@ -240,9 +240,13 @@ export const projects = [
       {
         type: "media-text",
         side: "left",
-        mediaLayout: "aside",
+        mediaLayout: "trio",
         images: [
-          "/carousel/smash-mobile.webp",
+          {
+            type: "video",
+            src: "/carousel/smash-mobile.mp4",
+            poster: "/carousel/smash-mobile-poster.webp",
+          },
           "/carousel/smash-section4-1.webp",
           "/carousel/smash-section4-2.webp",
         ],

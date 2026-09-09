@@ -1693,19 +1693,6 @@ a {
 .story__media--trio .story__media-card:first-child {
   grid-column: 1 / -1;
 }
-/* a tall portrait beside a stacked pair — a phone screen next to two
-   square crops. The portrait spans both rows, so the group squares off
-   at the bottom instead of leaving a gap under the shorter column. */
-.story__media--aside {
-  display: grid;
-  grid-template-columns: 0.78fr 1fr;
-  gap: clamp(12px, 1.6vw, 18px);
-  align-items: start;
-}
-.story__media--aside .story__media-card:first-child {
-  grid-row: 1 / span 2;
-}
-
 /* a 2x2 grid instead of a vertical stack, for sections that want their
    media to read as a bento arrangement rather than a single column. A
    bento's cells aren't meant to be uniform — rows size to their tallest
@@ -1734,6 +1721,12 @@ a {
 
 /* a metrics band — big numbers separated by hairline rules, in the same
    line-based language as the meta row rather than a filled panel */
+/* the band always sits on white, whatever the alternation would have
+   given it — the numbers carry the section, and a tinted ground behind
+   them muddies the accent */
+.story__stats-section.story__section--alt {
+  background: var(--paper);
+}
 .story__stats-label {
   font-family: var(--font-mono);
   font-size: 0.7rem;
@@ -1763,8 +1756,8 @@ a {
 }
 .story__stat strong {
   display: block;
-  font-family: var(--font-heavy);
-  font-weight: 400;
+  font-family: var(--font-display);
+  font-weight: 800;
   font-size: clamp(2.4rem, 5.5vw, 4.2rem);
   line-height: 1;
   letter-spacing: -0.01em;
@@ -1773,10 +1766,9 @@ a {
 .story__stat span {
   display: block;
   margin-top: 0.7rem;
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.4;
   color: var(--ink-soft);
 }
 .story__stats-note {
@@ -1859,17 +1851,13 @@ a {
   }
   .story__bento-grid,
   .story__media--bento,
-  .story__media--trio,
-  .story__media--aside {
+  .story__media--trio {
     grid-template-columns: 1fr;
   }
   .story__bento-img--1,
   .story__bento-span-2,
   .story__media--trio .story__media-card:first-child {
     grid-column: auto;
-  }
-  .story__media--aside .story__media-card:first-child {
-    grid-row: auto;
   }
 }
 

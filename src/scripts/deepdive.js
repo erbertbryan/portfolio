@@ -164,9 +164,8 @@ function storyBodyMarkup(project) {
         .map((item) => `<div class="story__media-card">${mediaTag(item)}</div>`)
         .join("");
       // "bento" = 2x2 grid, "trio" = one full-width above a matched pair,
-      // "aside" = one tall portrait beside a stacked pair, otherwise a
-      // plain vertical stack
-      const layouts = { bento: "bento", trio: "trio", aside: "aside" };
+      // otherwise a plain vertical stack
+      const layouts = { bento: "bento", trio: "trio" };
       const stackClass =
         s.images.length > 1 ? ` story__media--${layouts[s.mediaLayout] || "stack"}` : "";
       const media = `<div class="story__media${stackClass}">${imgs}</div>`;
