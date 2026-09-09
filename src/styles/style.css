@@ -1139,13 +1139,12 @@ a {
      width to balloon. */
   --frame-pad-x: clamp(20px, 4vw, 60px);
   padding: clamp(28px, 4vw, 52px) var(--frame-pad-x);
-  /* fixed and deliberately short — the video is far taller than this
-     and runs off the bottom edge, cropped here rather than growing the
-     box to fit. The wide, letterboxed proportion is the point: it's
-     what makes the laptop read big against it. Bounded by vh, not vw,
-     so it never grows with a wide monitor the way the video's old
-     width-based sizing did. */
-  height: clamp(440px, 62vh, 630px);
+  /* fills the screen below the sticky offset — each project is meant to
+     read as its own full-height beat, not a short strip, and stays that
+     way no matter how tall the window gets, down to a floor for short
+     laptop screens. Independent of the video's own sizing (see .case
+     .showcase--hero), which is bounded in vw, not tied to this. */
+  height: clamp(520px, calc(100vh - var(--stick) - 32px), 1400px);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -1236,6 +1235,14 @@ a {
   text-transform: uppercase;
   color: var(--ink);
   margin-top: clamp(14px, 1.8vw, 22px);
+  /* the video is allowed to run behind this text by design (see .case
+     .showcase--hero) and its content varies clip to clip — a dark
+     screenshot behind a dark headline goes unreadable even though
+     z-index already keeps the text drawn on top. This halo matches the
+     card's own white so it's invisible with nothing behind it, and only
+     shows up as protection exactly when something is. */
+  text-shadow: 0 0 1px var(--card), 0 0 3px var(--card), 0 0 14px var(--card),
+    0 0 28px var(--card);
 }
 /* the highlighter-style block behind the title text — an inline element
    so a wrapped title gets the tint painted separately per line instead
@@ -1476,19 +1483,18 @@ a {
 .case .showcase--hero {
   position: absolute;
   z-index: 1;
-  top: 0;
-  /* right-anchored and sized off the frame's own (viewport-bounded)
-     height rather than off .case__body's width — width has no ceiling
-     on a wide monitor, height does, which is what kept this from
-     ballooning. 1800/886 matches the source clip's own crop ratio, so
-     the box's width falls out of the height with nothing left to tune
-     per-breakpoint. Docked past the frame's inner padding so it bleeds
-     to the frame's true edge, clipped there by .case__frame's own
-     overflow: hidden rather than by anything on this element. */
+  top: 50%;
+  /* fixed placement, sized straight off the viewport rather than off
+     any ancestor box — that was the source of every earlier version of
+     this bug, whether the ancestor's width was unbounded (ballooned on
+     a wide monitor) or its height was (overlapped the text on a
+     short-but-narrow window). A vw value clamped between hard px
+     bounds can't do either: it never depends on .case__frame or
+     .case__body at all, just the screen itself. Height follows from
+     the video's own intrinsic ratio, same as it always has. */
   right: calc(-1 * var(--frame-pad-x));
-  width: auto;
-  height: 112%;
-  aspect-ratio: 1800 / 886;
+  width: clamp(560px, max(66vw, 95vh), 1320px);
+  transform: translateY(-50%);
   margin-top: 0;
   display: block;
 }
@@ -2132,9 +2138,9 @@ a {
     position: static;
     width: 100%;
     height: auto;
-    aspect-ratio: auto;
     right: auto;
     top: auto;
+    transform: none;
     margin-top: clamp(24px, 5vw, 40px);
   }
   /* three fixed columns is too wide to fit a phone — back to wrapping */
