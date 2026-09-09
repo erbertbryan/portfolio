@@ -319,13 +319,15 @@ function initCounters(root) {
    phone clip's own rightward drift. A blind CSS percentage can push
    content past a narrow viewport's edge, forcing a horizontal scrollbar
    or clipping against an ancestor's overflow; this measures the element's
-   real clearance to the viewport edge (minus a small gutter matching the
-   page's own edge padding) and clamps to whichever is smaller, so the
-   nudge never crops or overflows on any screen size. */
+   real clearance to the viewport edge (minus a thin gutter — the media
+   is on a solid white ground with no visible seam, so it only needs to
+   stop just short of the true edge, not stay clear of it) and clamps to
+   whichever is smaller, so the nudge never crops or overflows on any
+   screen size. */
 function initShiftedMedia(root) {
   const els = root.querySelectorAll("[data-shift]");
   if (!els.length) return;
-  const GUTTER = 16;
+  const GUTTER = 4;
 
   const apply = (el) => {
     const pct = parseFloat(el.dataset.shift);

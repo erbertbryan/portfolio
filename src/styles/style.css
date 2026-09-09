@@ -1804,7 +1804,7 @@ a {
    canvas exactly, so the video is free to bleed into the margin around
    it with no visible seam — nothing needs to be cut for that to work. */
 .story__bento-lead {
-  max-width: clamp(320px, 40vw, 560px);
+  max-width: clamp(320px, 44vw, 620px);
   margin: 0 auto clamp(28px, 4vw, 44px);
 }
 .story__bento-lead img,
@@ -2666,6 +2666,14 @@ body.no-scroll {
      reads as a squashed row rather than a pile — tighten the cascade */
   .stack__list {
     --deck-step: 12px;
+  }
+  /* initShiftedMedia clamps its recentering nudge to whatever room the
+     box actually has, so it can't crop or force a scrollbar — but the
+     320px desktop floor barely leaves any of that room on a real phone,
+     leaving the shift visibly under-corrected. Narrower here only, so
+     the smaller floor doesn't roll back the bigger tablet/desktop size. */
+  .story__bento-lead {
+    max-width: clamp(220px, 60vw, 280px);
   }
   /* the tags wrap to several rows on a phone; the desktop line-height
      and 18px gap left them looking loosely stacked */
