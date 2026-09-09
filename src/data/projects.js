@@ -194,4 +194,78 @@ export const projects = [
       },
     ],
   },
+  {
+    id: "smash",
+    layout: "hero", // one large screenshot, deliberately cropped by the frame
+    logo: "Smash Hub", // text mark — no vector supplied yet
+    // the product's own wordmark is two words; "SMASHHUB" set as one
+    // collides on the double H at display size
+    name: "Smash Hub",
+    accent: "#B6E036", // sampled from the product's own lime CTA
+    tags: [
+      "#Pickleball",
+      "#WebApp",
+      "#SaaS",
+      "#UIUX",
+      "#BookingSystem",
+      "#Dashboard",
+    ],
+    platform: "Web",
+    role: "UI/UX Designer & Product Strategist",
+    blurb:
+      "SmashHub needed a dedicated web platform to streamline operations for their growing court rental business. In a local market crowded with fragmented solutions, where platforms offer either sleek UI with broken workflows, or functional systems burdened by dated, clunky interfaces, SmashHub required a balanced, high-converting digital product tailored for diverse player age groups.",
+    heroImage: "/carousel/smash-hero.webp",
+    story: [
+      {
+        type: "media-text",
+        side: "left",
+        mediaLayout: "trio",
+        images: [
+          "/carousel/smash-section3-1.webp",
+          "/carousel/smash-section3-2.webp",
+          "/carousel/smash-section3-3.webp",
+        ],
+        text: "I designed a modern court booking web app that simplifies scheduling into a direct, low-friction flow. To bridge the gap between court operations and business growth, we coupled the intuitive front-end player experience with an enterprise back-office system, featuring account management, multi-court allocation, automated local payment gateways, and real-time business performance analytics.",
+      },
+      {
+        type: "stats",
+        label: "Who plays now",
+        text: "Designing for pickleball meant accounting for a unique demographic split. While historical data positioned pickleball as a senior pastime, recent global sports statistics show a dramatic shift: the median player age has dropped to 34.8 years old, with 18–34 year olds now forming the single largest active cohort (~32%), while players aged 55+ still maintain steady court engagement.",
+        items: [
+          { value: "34.8", label: "Median player age" },
+          { value: "32%", label: "Aged 18–34" },
+          { value: "55+", label: "Still playing steadily" },
+        ],
+      },
+      {
+        type: "media-text",
+        side: "left",
+        mediaLayout: "aside",
+        images: [
+          "/carousel/smash-mobile.webp",
+          "/carousel/smash-section4-1.webp",
+          "/carousel/smash-section4-2.webp",
+        ],
+        text: "To serve both tech-savvy Gen Z/Millennial players and older regulars, we built an accessible interface using high-contrast UI tokens, clear visual feedback, and a streamlined 3-step court selection process.",
+      },
+      {
+        type: "bento",
+        text: "By replacing fragmented legacy tools with a unified platform, SmashHub eliminated booking friction for players while equipping facility managers with clear operational KPIs, court occupancy heatmaps, and automated revenue tracking.",
+        images: [
+          "/carousel/smash-section5-1.webp",
+          "/carousel/smash-section5-2.webp",
+          {
+            type: "video",
+            src: "/carousel/smash-customer-demo.mp4",
+            poster: "/carousel/smash-customer-demo-poster.webp",
+          },
+          {
+            type: "video",
+            src: "/carousel/smash-admin-demo.mp4",
+            poster: "/carousel/smash-admin-demo-poster.webp",
+          },
+        ],
+      },
+    ],
+  },
 ];

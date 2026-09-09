@@ -1693,6 +1693,19 @@ a {
 .story__media--trio .story__media-card:first-child {
   grid-column: 1 / -1;
 }
+/* a tall portrait beside a stacked pair — a phone screen next to two
+   square crops. The portrait spans both rows, so the group squares off
+   at the bottom instead of leaving a gap under the shorter column. */
+.story__media--aside {
+  display: grid;
+  grid-template-columns: 0.78fr 1fr;
+  gap: clamp(12px, 1.6vw, 18px);
+  align-items: start;
+}
+.story__media--aside .story__media-card:first-child {
+  grid-row: 1 / span 2;
+}
+
 /* a 2x2 grid instead of a vertical stack, for sections that want their
    media to read as a bento arrangement rather than a single column. A
    bento's cells aren't meant to be uniform — rows size to their tallest
@@ -1734,7 +1747,10 @@ a {
   max-width: var(--maxw);
   margin: clamp(36px, 5vw, 56px) auto 0;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  /* one equal column per stat, however many there are — a hard-coded
+     four left a blank quarter on a three-stat band */
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
   border: 1px solid var(--line);
 }
 .story__stat {
@@ -1769,6 +1785,7 @@ a {
 }
 @media (max-width: 760px) {
   .story__stats {
+    grid-auto-flow: row;
     grid-template-columns: 1fr 1fr;
   }
   .story__stat:nth-child(odd) {
@@ -1784,6 +1801,10 @@ a {
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr 1fr;
+  /* each card hugs its own media instead of stretching to the tallest in
+     the row — a stretched card leaves dead white space under a shorter
+     image now that nothing is cropped to a common ratio */
+  align-items: start;
   gap: clamp(14px, 2vw, 22px);
 }
 /* rows of 2/3/2 (see storyBodyMarkup's 7-item case) — every tile in a
@@ -1799,6 +1820,9 @@ a {
   display: flex;
   gap: clamp(14px, 2vw, 22px);
 }
+.story__bento-row {
+  align-items: start;
+}
 .story__bento-row .story__bento-card {
   flex: 1 1 0;
   min-width: 0;
@@ -1811,12 +1835,16 @@ a {
   padding: clamp(6px, 0.9vw, 10px);
   box-shadow: 0 22px 50px -30px rgba(23, 19, 13, 0.32);
 }
+/* Height comes from the media's own proportions — no fixed aspect-ratio
+   and no cover. A hard-coded ratio here only ever matched the one project
+   whose source images all shared it; every other project's media got
+   cropped to fit it. Letting the box follow the image also keeps this
+   inner border tight against the artwork, which object-fit would not. */
 .story__bento-card img,
 .story__bento-card video {
   display: block;
   width: 100%;
-  aspect-ratio: 1696 / 943;
-  object-fit: cover;
+  height: auto;
   border: 1px solid var(--line);
   border-radius: 8px;
 }
@@ -1831,13 +1859,17 @@ a {
   }
   .story__bento-grid,
   .story__media--bento,
-  .story__media--trio {
+  .story__media--trio,
+  .story__media--aside {
     grid-template-columns: 1fr;
   }
   .story__bento-img--1,
   .story__bento-span-2,
   .story__media--trio .story__media-card:first-child {
     grid-column: auto;
+  }
+  .story__media--aside .story__media-card:first-child {
+    grid-row: auto;
   }
 }
 

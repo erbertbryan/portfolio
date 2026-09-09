@@ -164,8 +164,9 @@ function storyBodyMarkup(project) {
         .map((item) => `<div class="story__media-card">${mediaTag(item)}</div>`)
         .join("");
       // "bento" = 2x2 grid, "trio" = one full-width above a matched pair,
-      // otherwise a plain vertical stack
-      const layouts = { bento: "bento", trio: "trio" };
+      // "aside" = one tall portrait beside a stacked pair, otherwise a
+      // plain vertical stack
+      const layouts = { bento: "bento", trio: "trio", aside: "aside" };
       const stackClass =
         s.images.length > 1 ? ` story__media--${layouts[s.mediaLayout] || "stack"}` : "";
       const media = `<div class="story__media${stackClass}">${imgs}</div>`;
@@ -248,16 +249,22 @@ function initCounters(root) {
   if (REDUCE) return; // final value is already in the markup
 
   const run = (el) => {
-    const target = parseFloat(el.dataset.countTo);
+    // split a value like "32%" or "55+" into the number to count and
+    // the unit that rides along with it, so the suffix is on screen for
+    // the whole animation rather than popping in on the final frame
+    const m = /^(-?[\d.]+)(.*)$/.exec(el.dataset.countTo);
+    if (!m) return;
+    const target = parseFloat(m[1]);
     if (Number.isNaN(target)) return;
+    const suffix = m[2];
     // match the source's own precision, so "3.1" counts in decimals
     // while "100" stays whole
-    const dp = (el.dataset.countTo.split(".")[1] || "").length;
+    const dp = (m[1].split(".")[1] || "").length;
     const start = performance.now();
     const tick = (now) => {
       const p = Math.min(1, (now - start) / COUNT_MS);
       const eased = 1 - Math.pow(1 - p, 3); // easeOutCubic
-      el.textContent = (target * eased).toFixed(dp);
+      el.textContent = (target * eased).toFixed(dp) + suffix;
       if (p < 1) requestAnimationFrame(tick);
       else el.textContent = el.dataset.countTo;
     };
