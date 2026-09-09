@@ -1798,12 +1798,14 @@ a {
 /* a single media item leading a bento section, full width above the
    paragraph — no card chrome of its own, since this exists for media
    that already renders its own frame (a device mockup, its own shadow).
-   overflow: hidden clips the compensating shiftX below without it
-   pushing the section wider. */
+   No overflow:hidden here on purpose: a shiftX nudge (below) moves the
+   video within this box, and clipping it would crop real content off
+   one edge. The section's own solid background matches the clip's own
+   canvas exactly, so the video is free to bleed into the margin around
+   it with no visible seam — nothing needs to be cut for that to work. */
 .story__bento-lead {
-  max-width: clamp(240px, 30vw, 400px);
+  max-width: clamp(320px, 40vw, 560px);
   margin: 0 auto clamp(28px, 4vw, 44px);
-  overflow: hidden;
 }
 .story__bento-lead img,
 .story__bento-lead video {

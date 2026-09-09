@@ -83,9 +83,12 @@ function mediaTag(item) {
     return `<img src="${item}" alt="" loading="lazy" decoding="async" />`;
   }
   const poster = item.poster ? ` poster="${item.poster}"` : "";
-  // a static horizontal nudge — compensates for motion baked into the
-  // source footage itself (see initScrubVideos and its callers for why)
-  const shift = item.shiftX ? ` style="transform:translateX(${item.shiftX}%)"` : "";
+  // a percentage horizontal nudge — compensates for motion baked into the
+  // source footage itself. Left as a data attribute rather than an inline
+  // transform: a blind CSS percentage can push content past a narrow
+  // viewport's edge, so initShiftedMedia measures real clearance in JS and
+  // clamps to it before ever applying the transform.
+  const shift = item.shiftX ? ` data-shift="${item.shiftX}"` : "";
   if (item.scrub) {
     // no autoplay/loop — initScrubVideos drives currentTime directly off
     // scroll position, so the clip only ever moves because the user
@@ -311,6 +314,47 @@ function initCounters(root) {
    actually scrolls, the same way smoothScroll.js's scrollableAncestor()
    does for wheel events, falling back to window for markup used outside
    a locked container. */
+/* data-shift (from an item's `shiftX`) nudges media horizontally to
+   compensate for motion baked into the source itself — see the smash
+   phone clip's own rightward drift. A blind CSS percentage can push
+   content past a narrow viewport's edge, forcing a horizontal scrollbar
+   or clipping against an ancestor's overflow; this measures the element's
+   real clearance to the viewport edge (minus a small gutter matching the
+   page's own edge padding) and clamps to whichever is smaller, so the
+   nudge never crops or overflows on any screen size. */
+function initShiftedMedia(root) {
+  const els = root.querySelectorAll("[data-shift]");
+  if (!els.length) return;
+  const GUTTER = 16;
+
+  const apply = (el) => {
+    const pct = parseFloat(el.dataset.shift);
+    if (Number.isNaN(pct)) return;
+    el.style.transform = "none"; // measure the untransformed position first
+    const r = el.getBoundingClientRect();
+    const desired = (r.width * pct) / 100;
+    const shift =
+      desired < 0
+        ? Math.max(desired, -(r.left - GUTTER))
+        : Math.min(desired, window.innerWidth - r.right - GUTTER);
+    el.style.transform = shift ? `translateX(${shift.toFixed(1)}px)` : "";
+  };
+
+  els.forEach(apply);
+  // self-detach once every element from this open has left the page,
+  // the same pattern initScrubVideos uses, so switching or closing deep
+  // dives doesn't accumulate one resize listener per visit
+  const onResize = () => {
+    const live = [...els].filter((el) => el.isConnected);
+    if (!live.length) {
+      window.removeEventListener("resize", onResize);
+      return;
+    }
+    live.forEach(apply);
+  };
+  window.addEventListener("resize", onResize);
+}
+
 function scrollHost(el) {
   let node = el.parentElement;
   while (node && node !== document.body) {
@@ -416,6 +460,7 @@ export function initDeepDive(root, cards, stack) {
       });
       initCounters(el);
       initScrubVideos(el);
+      initShiftedMedia(el);
     });
 
     history.pushState({ deepdive: id }, "", `#case-${id}`);
@@ -492,6 +537,7 @@ export function initDeepDive(root, cards, stack) {
       revealHero(toEl);
       initCounters(toEl);
       initScrubVideos(toEl);
+      initShiftedMedia(toEl);
 
       if (REDUCE) {
         animating = false;
@@ -564,6 +610,7 @@ export function initDeepDive(root, cards, stack) {
     });
     initCounters(el);
     initScrubVideos(el);
+    initShiftedMedia(el);
     current = match[1];
   }
 }
