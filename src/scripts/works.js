@@ -88,21 +88,23 @@ export function initWorks() {
         <span class="case__tick bl" aria-hidden="true"></span>
         <span class="case__tick br" aria-hidden="true"></span>
         <div class="case__body">
-          ${
-            p.logoSvg
-              ? `<img class="case__logo case__logo--img${
-                  p.logoSquare ? " case__logo--square" : ""
-                }" src="${p.logoSvg}" alt="${p.logo}"${
-                  p.logoScale ? ` style="--logo-scale:${p.logoScale}"` : ""
-                } />`
-              : `<span class="case__logo">${p.logo}</span>`
-          }
-          <h3 class="case__title">${p.name}</h3>
-          <div class="case__tags">${p.tags.map((t) => `<span>${t}</span>`).join("")}</div>
-          <button class="case__cta" type="button" data-clickable>
-            <span class="case__cta-label">Deep dive</span>
-            <i>${arrow}</i>
-          </button>
+          <div class="case__text">
+            ${
+              p.logoSvg
+                ? `<img class="case__logo case__logo--img${
+                    p.logoSquare ? " case__logo--square" : ""
+                  }" src="${p.logoSvg}" alt="${p.logo}"${
+                    p.logoScale ? ` style="--logo-scale:${p.logoScale}"` : ""
+                  } />`
+                : `<span class="case__logo">${p.logo}</span>`
+            }
+            <h3 class="case__title"><span>${p.name}</span></h3>
+            <div class="case__tags">${p.tags.map((t) => `<span>${t}</span>`).join("")}</div>
+            <button class="case__cta" type="button" data-clickable>
+              <span class="case__cta-label">Deep dive</span>
+              <i>${arrow}</i>
+            </button>
+          </div>
           ${showcase(p)}
         </div>
       </div>`;

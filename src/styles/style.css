@@ -1124,12 +1124,8 @@ a {
      separate sibling element and keeps its usual alternation. */
   background: var(--card);
   border: 1px solid var(--line);
-  padding: clamp(44px, 6vw, 84px) clamp(20px, 4vw, 60px) 0;
-  /* fixed, not a floor: the hero video is deliberately oversized (see
-     .showcase--hero__card) and meant to run off the bottom edge, cropped
-     by this box rather than pushing it taller */
-  height: clamp(560px, 90vh, 1180px);
-  overflow: hidden;
+  padding: clamp(32px, 5vw, 64px) clamp(20px, 4vw, 60px);
+  min-height: clamp(420px, 62vh, 640px);
   display: flex;
   flex-direction: column;
 }
@@ -1139,13 +1135,25 @@ a {
 .case__tick.bl { bottom:-1px; left:-1px; border-bottom:1px solid var(--ink); border-left:1px solid var(--ink); }
 .case__tick.br { bottom:-1px; right:-1px; border-bottom:1px solid var(--ink); border-right:1px solid var(--ink); }
 
+/* text column beside the hero video rather than stacked above it —
+   .case__text carries the logo/title/tags/CTA as its own left-aligned
+   flex column, .showcase--hero (rendered by works.js's showcase()) is
+   the grid's second cell. Both sit vertically centred against each
+   other via align-items on the grid itself. */
 .case__body {
   position: relative;
   flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  align-items: center;
+  gap: clamp(28px, 4vw, 64px);
+}
+.case__text {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  text-align: left;
+  min-width: 0;
 }
 .case__logo {
   display: inline-flex;
@@ -1191,25 +1199,29 @@ a {
 .case__title {
   font-family: var(--font-heavy);
   font-weight: 400;
-  font-size: clamp(2.3rem, 8.5vw, 7rem);
-  line-height: 0.92;
+  /* smaller than the old full-width stack used — this now shares the
+     row with the video instead of spanning the whole card */
+  font-size: clamp(2rem, 4.4vw, 3.6rem);
+  line-height: 1.08;
   letter-spacing: 0.01em;
   text-transform: uppercase;
   color: var(--ink);
-  margin-top: clamp(16px, 2.4vw, 32px);
-  /* reserves 2 lines' worth of height always, one-line titles included —
-     the hero video below is top-aligned and just grows downward from
-     wherever this block ends, so a title that wraps to two lines on one
-     project and one line on another was leaving noticeably less of the
-     video visible above the frame's crop line on the two-line project.
-     Same line-height (0.92) both places, so this is exactly 2 lines. */
-  min-height: 1.84em;
+  margin-top: clamp(14px, 1.8vw, 22px);
+}
+/* the highlighter-style block behind the title text — an inline element
+   so a wrapped title gets the tint painted separately per line instead
+   of one box stretching the width of the longest line */
+.case__title span {
+  background: var(--paper-2);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  padding: 0.05em 0.14em;
 }
 .case__tags {
   display: flex;
-  gap: 18px;
+  gap: 10px 16px;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: flex-start;
   margin-top: clamp(14px, 1.6vw, 22px);
 }
 .case__tags span {
@@ -1427,12 +1439,9 @@ a {
 }
 
 .showcase--hero {
-  flex: 1 1 auto;
-  width: 100%;
-  min-height: 0;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  min-width: 0;
 }
 /* No card chrome of its own — the clip already renders its own device
    mockup and drop shadow on a white canvas, so a matte border/padding/
@@ -1443,32 +1452,22 @@ a {
    one rigid unit, so nothing can drift out of sync with it. */
 .showcase--hero__card {
   box-sizing: border-box;
-  /* deliberately wider than the frame can hold at its own aspect ratio —
-     .case__frame clips the overflow at its bottom edge, right around the
-     laptop's keyboard, rather than shrinking the video to fit clear.
-     flex-shrink: 0 because .showcase--hero is itself a flex container —
-     without it, the default shrink-to-fit silently cancels this back
-     down to the container's own width, undoing the whole effect. */
-  width: min(1750px, 140%);
-  flex-shrink: 0;
+  /* fills its grid column; a little wider than 100% so it reads as
+     bleeding past the text column rather than stopping neatly beside
+     it — safe to overlap since the clip's own canvas is white and sits
+     on the same white frame, so nothing shows a seam where they meet */
+  width: 108%;
+  max-width: 108%;
   --hero-tilt: 48deg;
   --hero-scale: 0.92;
   transform: perspective(1400px) rotateX(var(--hero-tilt)) scale(var(--hero-scale));
   transform-origin: 50% 100%;
   opacity: 0;
-  transition: transform 1000ms var(--ease), opacity 700ms ease, width 1000ms var(--ease);
+  transition: transform 1000ms var(--ease), opacity 700ms ease;
 }
 .showcase--hero__card video {
   display: block;
   width: 100%;
-  /* the laptop mockup in every one of these clips sits ~1.3% right of
-     its own canvas's centre (checked directly against all 5 source
-     files) — small enough to miss when the card was smaller, obvious
-     now that it's this large. No clip risk nudging it back: the card
-     has no overflow:hidden of its own, and both it and the page behind
-     it are the same solid white, so this has nowhere visible to bleed
-     into. */
-  transform: translateX(-1.3%);
 }
 /* scrolled into view: lies flat like a tablet on a table, then rises
    upright — see initHeroReveal() in works.js, which adds this class
@@ -1479,10 +1478,6 @@ a {
   opacity: 1;
 }
 .case.is-expanded .showcase--hero__card {
-  /* same deliberately-oversized width as the closed card (base rule),
-     so the deep dive's cover crops the clip the same way rather than
-     shrinking it back down to fit clear once the tilt goes away */
-  width: min(1750px, 140%);
   --hero-tilt: 0deg;
   --hero-scale: 1;
   opacity: 1;
@@ -1554,9 +1549,6 @@ a {
 }
 .case.is-expanded .case__cta {
   display: none; /* replaced by the pinned .case__back above */
-}
-.case.is-expanded .showcase {
-  margin-top: clamp(20px, 3vw, 36px);
 }
 .case.is-expanded .phone {
   width: clamp(120px, 12vw, 165px);
@@ -2060,32 +2052,30 @@ a {
 }
 
 @media (max-width: 760px) {
-  /* the oversized-hero bleed only ever engages on wider screens — at
-     mobile widths the card already renders smaller than the frame with
-     room to spare, so the fixed height (needed to force clipping on
-     desktop) just left a dead gap below it instead. Back to auto-sizing
-     to content here, with the bottom breathing room restored since
-     nothing needs to bleed to the edge at this width. */
+  /* the side-by-side layout doesn't have room to stay side-by-side on a
+     phone — text stacks above the video, both centred, matching how the
+     rest of the site collapses to a single centred column on mobile. */
   .case__frame {
-    height: auto;
     min-height: clamp(500px, 78vh, 820px);
-    overflow: visible;
-    padding-bottom: clamp(34px, 4vw, 58px);
   }
-  /* the desktop card is deliberately wider than its container (128-140%)
-     to force the crop — at a narrow viewport that overshoots the actual
-     screen edge, not just the frame, forcing a page-wide horizontal
-     scrollbar (confirmed: 13px of real scroll on a 375px width). Nothing
-     here needs to bleed at this size in the first place.
-     .case.is-expanded .showcase--hero__card is listed separately, not
-     folded into the plain selector above, because two classes beat one
-     on specificity — the deep-dive's own 140% rule would otherwise keep
-     winning here regardless of source order, which is exactly how this
-     shipped broken the first time (capped the closed card, missed the
-     expanded one, and the expanded one is what a deep-dive page shows). */
-  .showcase--hero__card,
-  .case.is-expanded .showcase--hero__card {
+  .case__body {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+  .case__text {
+    align-items: center;
+    text-align: center;
+  }
+  .case__tags {
+    justify-content: center;
+  }
+  /* the 108% desktop bleed has no text column to bleed past here, and
+     at a narrow viewport it would overshoot the screen edge itself
+     instead — a page-wide horizontal scrollbar, confirmed once already
+     the last time this card got wider than its container unchecked. */
+  .showcase--hero__card {
     width: min(1000px, 96%);
+    max-width: 96%;
   }
 }
 
