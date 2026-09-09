@@ -168,7 +168,7 @@ export const projects = [
     layout: "hero", // one large screenshot, deliberately cropped by the frame
     logo: "Specialty Coffee Depot",
     logoSvg: "/brand/logos/coffee.svg",
-    logoScale: 1.5, // two-line wordmark — reads small at the shared height
+    logoSquare: true, // now an icon mark alone, not an icon+wordmark lockup
     name: "Specialty Coffee",
     accent: "#7B4B2A",
     tags: ["#Ecommerce", "#Web", "#Coffee", "#DesignSystem", "#Branding"],
