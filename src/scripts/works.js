@@ -98,7 +98,7 @@ export function initWorks() {
                   } />`
                 : `<span class="case__logo">${p.logo}</span>`
             }
-            <h3 class="case__title"><span>${p.name}</span></h3>
+            <h3 class="case__title">${p.name}</h3>
             <div class="case__tags">${p.tags.map((t) => `<span>${t}</span>`).join("")}</div>
             <button class="case__cta" type="button" data-clickable>
               <span class="case__cta-label">Deep dive</span>
