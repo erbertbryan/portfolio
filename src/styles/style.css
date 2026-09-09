@@ -1115,6 +1115,14 @@ a {
 }
 .case__frame {
   position: relative;
+  /* pure white, not the page's off-white paper — every hero is now a
+     clip that renders its own white canvas, and the two are close
+     enough that a mismatch would read as an error, not a design choice.
+     Scoped to the frame (not .case or .case.is-expanded) so it covers
+     the card in both its closed and deep-dived states without also
+     recolouring the deep dive's own sections below, which is a
+     separate sibling element and keeps its usual alternation. */
+  background: var(--card);
   border: 1px solid var(--line);
   padding: clamp(44px, 6vw, 84px) clamp(20px, 4vw, 60px) clamp(34px, 4vw, 58px);
   min-height: clamp(500px, 78vh, 820px);
@@ -1415,20 +1423,16 @@ a {
   justify-content: center;
   align-items: flex-start;
 }
-/* the white "matte" card: padding/border/shadow, plus the reveal-tilt
-   transform — the transform lives here, on the outer card, never on the
-   image. A transformed parent carries its whole rendered subtree (the
-   image and its own inner border included) as one rigid unit, so the
-   two borders can never drift out of sync the way a separately
-   animated inner layer did. */
+/* No card chrome of its own — the clip already renders its own device
+   mockup and drop shadow on a white canvas, so a matte border/padding/
+   shadow here would just frame a frame (the .case__frame background
+   below matches that same white so nothing seams against it either).
+   The reveal-tilt transform still lives on this outer element, never on
+   the video: a transformed parent carries its whole rendered subtree as
+   one rigid unit, so nothing can drift out of sync with it. */
 .showcase--hero__card {
   box-sizing: border-box;
   width: min(1000px, 96%);
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: clamp(8px, 1.1vw, 12px);
-  box-shadow: 0 22px 50px -30px rgba(23, 19, 13, 0.38);
   --hero-tilt: 48deg;
   --hero-scale: 0.92;
   transform: perspective(1400px) rotateX(var(--hero-tilt)) scale(var(--hero-scale));
@@ -1436,14 +1440,9 @@ a {
   opacity: 0;
   transition: transform 1000ms var(--ease), opacity 700ms ease, width 1000ms var(--ease);
 }
-/* the full screenshot, uncropped — a second, thinner border sits
-   directly on it, inset from the card's own border by the card's
-   padding, like a photo behind a mat */
-.showcase--hero__card img {
+.showcase--hero__card video {
   display: block;
   width: 100%;
-  border: 1px solid var(--line);
-  border-radius: 8px;
 }
 /* scrolled into view: lies flat like a tablet on a table, then rises
    upright — see initHeroReveal() in works.js, which adds this class

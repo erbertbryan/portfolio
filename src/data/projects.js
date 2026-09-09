@@ -12,7 +12,10 @@ export const projects = [
     role: "UI/UX Lead & Brand Designer",
     blurb:
       "An asset finance webapp needed a complete digital transformation to elevate its product experience and reflect its expanding lineup of features.",
-    heroImage: "/carousel/fintech-hero.webp",
+    heroVideo: {
+      src: "/carousel/fintech-hero.mp4",
+      poster: "/carousel/fintech-hero-poster.webp",
+    },
     // custom section-by-section story, instead of the default problem/solution/mockups template
     story: [
       {
@@ -62,7 +65,10 @@ export const projects = [
     role: "UI/UX Designer & Illustrator",
     blurb:
       "A leading Philippine construction supplier needed to modernize its digital storefront after legacy navigation and poor product discoverability began suppressing online conversions.",
-    heroImage: "/carousel/hardware-hero.webp",
+    heroVideo: {
+      src: "/carousel/hardware-hero.mp4",
+      poster: "/carousel/hardware-hero-poster.webp",
+    },
     // custom section-by-section story, instead of the default problem/solution/mockups template
     story: [
       {
@@ -104,7 +110,10 @@ export const projects = [
     role: "UI/UX Designer",
     blurb:
       "Mugna Tech needed to modernize its digital flagship to reflect its edge in building premium, high-end websites. The original site already performed well — the visual presence just needed to match the company's core mission: delivering world-class digital and software solutions for everyone.",
-    heroImage: "/carousel/mugna-hero.webp",
+    heroVideo: {
+      src: "/carousel/mugna-hero.mp4",
+      poster: "/carousel/mugna-hero-poster.webp",
+    },
     story: [
       {
         type: "stats",
@@ -167,7 +176,10 @@ export const projects = [
     role: "UI/UX Designer",
     blurb:
       "Specialty Coffee Depot PH needed a dedicated e-commerce web platform to expand its reach and establish an online storefront for its specialized coffee products.",
-    heroImage: "/carousel/coffee-hero.webp",
+    heroVideo: {
+      src: "/carousel/coffee-hero.mp4",
+      poster: "/carousel/coffee-hero-poster.webp",
+    },
     story: [
       {
         type: "media-text",
@@ -214,7 +226,10 @@ export const projects = [
     role: "UI/UX Designer & Product Strategist",
     blurb:
       "SmashHub needed a dedicated web platform to streamline operations for their growing court rental business. In a local market crowded with fragmented solutions, where platforms offer either sleek UI with broken workflows, or functional systems burdened by dated, clunky interfaces, SmashHub required a balanced, high-converting digital product tailored for diverse player age groups.",
-    heroImage: "/carousel/smash-hero.webp",
+    heroVideo: {
+      src: "/carousel/smash-hero.mp4",
+      poster: "/carousel/smash-hero-poster.webp",
+    },
     story: [
       {
         type: "media-text",
