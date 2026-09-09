@@ -2,16 +2,19 @@
    Deep dive — expands a case card in place into a full case-study
    page: no navigation, no loading state.
 
-   Opening/closing is a staged transition, not a crossfade: the nav
-   slides up, the card itself FLIPs (First/Last/Invert/Play) from its
-   spot in the list up to filling the screen, then the Back pill slides
-   down into place. A scale-based FLIP used to distort the card's
-   content because the expanded hero was laid out smaller than the
-   closed card — now that .case.is-expanded deliberately reuses the
-   same .case__frame/.case__title sizing as the closed state (see
-   style.css), the two only differ by the CTA swapping for Back and the
-   story continuing underneath, so scaling the whole card as one rigid
-   unit during the FLIP no longer stretches anything out of shape.
+   Opening/closing is a staged transition: the nav slides up, the
+   card's frame slides into place and shrinks to a compact header
+   (roughly half its closed-card size — see .case.is-expanded in
+   style.css), then the Back pill slides down. Two different mechanisms
+   share that middle step, deliberately not one scale transform for
+   both: the frame's own width never changes between closed and
+   expanded (both stay full-bleed), only its height does, so a single
+   rigid scale can't shrink the video/title and reposition the card at
+   once without distorting one of them. flipPosition() below only
+   compensates for the small sticky -> fixed jump (a translate, no
+   scale); the actual shrink is real height/width/font-size
+   transitions on the frame/video/title, triggered by the same
+   .is-expanded class toggle and left to animate on their own terms.
 
    Only the "Back" pill stays pinned as you scroll — the header itself
    scrolls away like the rest of the page. Switching between two open
@@ -26,20 +29,26 @@ const REDUCE = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const FADE_OUT = REDUCE ? 0 : 220;
 const FADE_IN = REDUCE ? 0 : 360;
 const NAV_MS = REDUCE ? 0 : 320;
-const FLIP_MS = REDUCE ? 0 : 620;
+// matches .case__frame/.case__title/.showcase--hero's own transition
+// duration in style.css (the resize) — this is only the position slide,
+// but keeping them equal is what makes the two read as one movement
+const FLIP_MS = REDUCE ? 0 : 640;
 const BACK_MS = REDUCE ? 0 : 300;
 
 const ARROW_FWD = '<svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg>';
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
-/* FLIP: measure el's current on-screen box, run `apply` (expected to
-   change el into its new layout synchronously — e.g. toggling
-   .is-expanded), measure the resulting box, then animate a transform
-   from the old box to the new one so el visually grows or shrinks
-   between the two instead of jump-cutting. Direction-agnostic: works
-   the same whether `apply` is the open change or the close change. */
-function flip(el, apply) {
+/* Position-only FLIP: measure el's current top, run `apply` (expected
+   to change el into its new layout synchronously — e.g. toggling
+   .is-expanded, which switches it from position: sticky to fixed),
+   measure where it landed, then animate a translateY from the old spot
+   to the new one so it visually slides into place instead of jump-
+   cutting. No scale on purpose — see the file header for why the
+   resize itself is left to real CSS transitions instead. Always takes
+   the full FLIP_MS, even when dy is 0, so it stays in step with those
+   transitions (also FLIP_MS) regardless of how far the card moves. */
+function flipPosition(el, apply) {
   return new Promise((resolve) => {
     const first = el.getBoundingClientRect();
     apply();
@@ -49,14 +58,14 @@ function flip(el, apply) {
     }
     void el.offsetWidth;
     const last = el.getBoundingClientRect();
-    const dx = first.left - last.left;
     const dy = first.top - last.top;
-    const sx = first.width / last.width;
-    const sy = first.height / last.height;
 
-    el.style.transformOrigin = "top left";
+    if (!dy) {
+      setTimeout(resolve, FLIP_MS);
+      return;
+    }
     el.style.transition = "none";
-    el.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
+    el.style.transform = `translateY(${dy}px)`;
     void el.offsetWidth;
     requestAnimationFrame(() => {
       el.style.transition = `transform ${FLIP_MS}ms var(--ease)`;
@@ -64,7 +73,6 @@ function flip(el, apply) {
       setTimeout(() => {
         el.style.transition = "";
         el.style.transform = "";
-        el.style.transformOrigin = "";
         resolve();
       }, FLIP_MS);
     });
@@ -513,7 +521,7 @@ export function initDeepDive(root, cards, stack) {
     others.forEach((c) => c.el.classList.add("is-hidden"));
     document.body.classList.add("no-scroll");
 
-    await flip(el, () => {
+    await flipPosition(el, () => {
       el.classList.add("is-expanded");
       el.insertAdjacentHTML("beforeend", storyMarkup(project, others));
       revealHero(el);
@@ -559,7 +567,7 @@ export function initDeepDive(root, cards, stack) {
     // returns — each stage only makes sense once the previous is clear
     await slideBackOut(backWrap);
 
-    await flip(el, () => {
+    await flipPosition(el, () => {
       el.classList.remove("is-expanded");
       story?.remove();
       root.classList.remove("has-expanded");
