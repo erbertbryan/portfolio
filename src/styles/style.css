@@ -1131,20 +1131,20 @@ a {
      separate sibling element and keeps its usual alternation. */
   background: var(--card);
   border: 1px solid var(--line);
-  /* every other section on the page caps its content at --maxw — this
-     was the one exception, and it's why the hero video looked right in
-     a ~1350px browser pane but ballooned on a real 1920/2560px monitor:
-     .showcase--hero sizes itself as a percentage of this box's own
-     width (see there), which had nothing stopping it from growing past
-     what the frame's fixed height was ever calibrated for. */
-  max-width: var(--maxw);
-  margin: 0 auto;
+  /* full-bleed on purpose (see .works comment above) — capping this at
+     --maxw was tried and looked right in the ~1350px browser pane, but
+     boxed the whole card in with big grey margins on a real 1920/2560px
+     monitor. The video's size no longer derives from this box's width
+     (see .case .showcase--hero) so there's nothing left for an unbounded
+     width to balloon. */
   --frame-pad-x: clamp(20px, 4vw, 60px);
   padding: clamp(28px, 4vw, 52px) var(--frame-pad-x);
   /* fixed and deliberately short — the video is far taller than this
      and runs off the bottom edge, cropped here rather than growing the
      box to fit. The wide, letterboxed proportion is the point: it's
-     what makes the laptop read big against it. */
+     what makes the laptop read big against it. Bounded by vh, not vw,
+     so it never grows with a wide monitor the way the video's old
+     width-based sizing did. */
   height: clamp(440px, 62vh, 630px);
   overflow: hidden;
   display: flex;
@@ -1477,8 +1477,18 @@ a {
   position: absolute;
   z-index: 1;
   top: 0;
-  left: 20%;
-  width: 130%;
+  /* right-anchored and sized off the frame's own (viewport-bounded)
+     height rather than off .case__body's width — width has no ceiling
+     on a wide monitor, height does, which is what kept this from
+     ballooning. 1800/886 matches the source clip's own crop ratio, so
+     the box's width falls out of the height with nothing left to tune
+     per-breakpoint. Docked past the frame's inner padding so it bleeds
+     to the frame's true edge, clipped there by .case__frame's own
+     overflow: hidden rather than by anything on this element. */
+  right: calc(-1 * var(--frame-pad-x));
+  width: auto;
+  height: 112%;
+  aspect-ratio: 1800 / 886;
   margin-top: 0;
   display: block;
 }
@@ -2121,7 +2131,9 @@ a {
   .case .showcase--hero {
     position: static;
     width: 100%;
-    left: auto;
+    height: auto;
+    aspect-ratio: auto;
+    right: auto;
     top: auto;
     margin-top: clamp(24px, 5vw, 40px);
   }
