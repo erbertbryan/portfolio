@@ -1590,6 +1590,13 @@ a {
 .story__section--alt {
   background: var(--paper-2);
 }
+/* pinned to pure white regardless of where the alternation lands — for a
+   section whose lead media renders its own white canvas, where the usual
+   off-white paper (let alone the alt tint) would show as a seam around
+   it. Placed after --alt so it wins if a section ever carries both. */
+.story__section--white {
+  background: var(--card);
+}
 .story__statement {
   max-width: 22ch;
   margin: 0 auto;
@@ -1670,21 +1677,6 @@ a {
   border-radius: 14px;
   padding: clamp(6px, 0.9vw, 10px);
   box-shadow: 0 22px 50px -30px rgba(23, 19, 13, 0.32);
-}
-/* strips the matte-card chrome for media that already frames itself —
-   the SmashHub phone clip renders its own device mockup and drop shadow,
-   so our card border/padding/shadow would be a frame around a frame */
-.story__media-card--bare {
-  background: none;
-  border: 0;
-  border-radius: 0;
-  padding: 0;
-  box-shadow: none;
-}
-.story__media-card--bare img,
-.story__media-card--bare video {
-  border: 0;
-  border-radius: 0;
 }
 .story__media-card img,
 .story__media-card video {
@@ -1801,6 +1793,23 @@ a {
   .story__stat:nth-child(n + 3) {
     border-top: 1px solid var(--line);
   }
+}
+
+/* a single media item leading a bento section, full width above the
+   paragraph — no card chrome of its own, since this exists for media
+   that already renders its own frame (a device mockup, its own shadow).
+   overflow: hidden clips the compensating shiftX below without it
+   pushing the section wider. */
+.story__bento-lead {
+  max-width: clamp(240px, 30vw, 400px);
+  margin: 0 auto clamp(28px, 4vw, 44px);
+  overflow: hidden;
+}
+.story__bento-lead img,
+.story__bento-lead video {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 .story__bento-grid {

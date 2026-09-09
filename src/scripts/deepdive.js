@@ -83,13 +83,16 @@ function mediaTag(item) {
     return `<img src="${item}" alt="" loading="lazy" decoding="async" />`;
   }
   const poster = item.poster ? ` poster="${item.poster}"` : "";
-  if (item.playOnScroll) {
-    // no autoplay/loop here — initScrollVideos starts it once, when the
-    // clip scrolls into view, and with nothing to loop it just holds on
-    // its own last frame when it finishes
-    return `<video src="${item.src}"${poster} muted playsinline preload="metadata" data-play-on-scroll></video>`;
+  // a static horizontal nudge — compensates for motion baked into the
+  // source footage itself (see initScrubVideos and its callers for why)
+  const shift = item.shiftX ? ` style="transform:translateX(${item.shiftX}%)"` : "";
+  if (item.scrub) {
+    // no autoplay/loop — initScrubVideos drives currentTime directly off
+    // scroll position, so the clip only ever moves because the user
+    // scrolled, in whichever direction they scrolled it
+    return `<video src="${item.src}"${poster}${shift} muted playsinline preload="auto" data-scrub></video>`;
   }
-  return `<video src="${item.src}"${poster} autoplay muted loop playsinline preload="metadata"></video>`;
+  return `<video src="${item.src}"${poster}${shift} autoplay muted loop playsinline preload="metadata"></video>`;
 }
 
 /* a `story` is an ordered list of custom sections — "media-text" pairs
@@ -125,6 +128,14 @@ function storyBodyMarkup(project) {
       }
       if (s.type === "bento") {
         const count = s.images.length;
+        // an optional single media item (usually a video) that leads the
+        // section, full width, above the centered paragraph — for a
+        // showcase beat that isn't just another grid tile
+        const leadHtml = s.lead ? `<div class="story__bento-lead">${mediaTag(s.lead)}</div>` : "";
+        // some sections are pinned to pure white rather than following the
+        // usual alternation — e.g. one whose lead media renders its own
+        // white canvas, where any tint would show as a seam around it
+        const white = s.onWhite ? " story__section--white" : "";
         // Counts that don't divide evenly into a 2-up grid get explicit row
         // sizes instead, so no tile is ever left alone on the last row.
         // Every tile in a row is equal width, which (since these source
@@ -144,7 +155,8 @@ function storyBodyMarkup(project) {
             )
             .join("");
           return `
-          <section class="story__section story__bento${alt}" data-story-in>
+          <section class="story__section story__bento${alt}${white}" data-story-in>
+            ${leadHtml}
             <p class="story__paragraph story__paragraph--center">${s.text}</p>
             <div class="story__bento-grid story__bento-grid--rows">${rows}</div>
           </section>`;
@@ -161,18 +173,14 @@ function storyBodyMarkup(project) {
           )
           .join("");
         return `
-        <section class="story__section story__bento${alt}" data-story-in>
+        <section class="story__section story__bento${alt}${white}" data-story-in>
+          ${leadHtml}
           <p class="story__paragraph story__paragraph--center">${s.text}</p>
           <div class="story__bento-grid">${imgs}</div>
         </section>`;
       }
       const imgs = s.images
-        .map(
-          (item) =>
-            `<div class="story__media-card${
-              typeof item === "object" && item.bare ? " story__media-card--bare" : ""
-            }">${mediaTag(item)}</div>`
-        )
+        .map((item) => `<div class="story__media-card">${mediaTag(item)}</div>`)
         .join("");
       // "bento" = 2x2 grid, "trio" = one full-width above a matched pair,
       // otherwise a plain vertical stack
@@ -297,27 +305,82 @@ function initCounters(root) {
   });
 }
 
-/* Videos marked data-play-on-scroll skip autoplay and loop — they start
-   once the clip scrolls into view and, with nothing to loop, simply hold
-   on their own last frame when they finish rather than looping forever. */
-function initScrollVideos(root) {
-  const vids = root.querySelectorAll("video[data-play-on-scroll]");
-  if (!vids.length) return;
-  if (REDUCE) return; // the poster frame stands in; nothing to trigger
+/* An open deep dive is position:fixed with its own overflow-y:auto — it
+   locks <body>'s scroll and becomes the scrolling element itself, so a
+   listener on window would never fire. Walk up to find whichever ancestor
+   actually scrolls, the same way smoothScroll.js's scrollableAncestor()
+   does for wheel events, falling back to window for markup used outside
+   a locked container. */
+function scrollHost(el) {
+  let node = el.parentElement;
+  while (node && node !== document.body) {
+    const oy = getComputedStyle(node).overflowY;
+    if ((oy === "auto" || oy === "scroll") && node.scrollHeight > node.clientHeight) {
+      return node;
+    }
+    node = node.parentElement;
+  }
+  return window;
+}
 
-  const io = new IntersectionObserver(
-    (entries, obs) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        const v = entry.target;
-        v.currentTime = 0;
-        v.play().catch(() => {}); // autoplay can still be blocked; the poster covers it
-        obs.unobserve(v);
+/* Videos marked data-scrub skip autoplay and loop entirely — scrolling
+   (either direction) sets currentTime directly off how far the clip has
+   travelled through its scroll container, so it plays forward or reverses
+   exactly in step with the scroll that's driving it. */
+function initScrubVideos(root) {
+  const vids = root.querySelectorAll("video[data-scrub]");
+  if (!vids.length) return;
+  if (REDUCE) return; // the poster frame stands in; scrubbing is scroll-driven motion
+
+  vids.forEach((v) => {
+    const host = scrollHost(v);
+    let raf = null;
+
+    const apply = () => {
+      // the deep dive can close (or switch to another project) while a
+      // scroll from an earlier open is still queued for this handler —
+      // self-detach the moment the video is no longer on the page rather
+      // than chasing a node that's already gone
+      if (!v.isConnected) {
+        host.removeEventListener("scroll", onScroll);
+        window.removeEventListener("resize", onScroll);
+        return;
+      }
+      if (!v.duration) return; // metadata not ready yet
+
+      // progress 0 as the element's top first reaches the viewport's
+      // bottom edge (it's just entering), 1 once that top edge has risen
+      // to 15% down from the top of the viewport — finishing near the top
+      // of the screen while the clip is still fully visible there, rather
+      // than mapping the last frame to the moment it scrolls out of view
+      // (where nobody would ever actually see it land). Tied to viewport
+      // height rather than the element's own, so the range doesn't shift
+      // if this clip's display size ever changes. getBoundingClientRect is
+      // viewport-relative no matter which element is actually doing the
+      // scrolling, so only the event source above needed to change to fix
+      // the locked-body case, not this math.
+      const r = v.getBoundingClientRect();
+      const startY = window.innerHeight;
+      const endY = window.innerHeight * 0.15;
+      const progress = Math.min(1, Math.max(0, (startY - r.top) / (startY - endY)));
+      v.currentTime = progress * v.duration;
+    };
+
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = null;
+        apply();
       });
-    },
-    { threshold: 0.5 }
-  );
-  vids.forEach((v) => io.observe(v));
+    };
+
+    host.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    // set the frame matching wherever the page already is the moment this
+    // opens, rather than waiting for the next scroll to catch up
+    if (v.readyState >= 1) apply();
+    else v.addEventListener("loadedmetadata", apply, { once: true });
+  });
 }
 
 export function initDeepDive(root, cards, stack) {
@@ -352,7 +415,7 @@ export function initDeepDive(root, cards, stack) {
         btn.addEventListener("click", () => switchTo(btn.dataset.switch));
       });
       initCounters(el);
-      initScrollVideos(el);
+      initScrubVideos(el);
     });
 
     history.pushState({ deepdive: id }, "", `#case-${id}`);
@@ -428,7 +491,7 @@ export function initDeepDive(root, cards, stack) {
       toEl.insertAdjacentHTML("beforeend", storyMarkup(toCard.project, others));
       revealHero(toEl);
       initCounters(toEl);
-      initScrollVideos(toEl);
+      initScrubVideos(toEl);
 
       if (REDUCE) {
         animating = false;
@@ -500,7 +563,7 @@ export function initDeepDive(root, cards, stack) {
       btn.addEventListener("click", () => switchTo(btn.dataset.switch));
     });
     initCounters(el);
-    initScrollVideos(el);
+    initScrubVideos(el);
     current = match[1];
   }
 }

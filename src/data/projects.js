@@ -238,25 +238,26 @@ export const projects = [
         ],
       },
       {
-        type: "media-text",
-        side: "left",
-        mediaLayout: "trio",
-        images: [
-          {
-            type: "video",
-            src: "/carousel/smash-mobile.mp4",
-            poster: "/carousel/smash-mobile-poster.webp",
-            // the clip already renders its own phone mockup on a white
-            // ground, so our card's border/padding/shadow would frame a
-            // frame; play once as it scrolls into view rather than
-            // looping, since it reads as a single deliberate demo beat
-            bare: true,
-            playOnScroll: true,
-          },
-          "/carousel/smash-section4-1.webp",
-          "/carousel/smash-section4-2.webp",
-        ],
+        type: "bento",
+        // the clip already renders its own phone mockup and drop shadow
+        // on a white canvas, so this section sits on the same pure white
+        // rather than the usual off-white paper — nothing reads as framed
+        onWhite: true,
+        lead: {
+          type: "video",
+          src: "/carousel/smash-mobile.mp4",
+          poster: "/carousel/smash-mobile-poster.webp",
+          // scroll (either direction) scrubs through the clip instead of
+          // it autoplaying — see initScrubVideos
+          scrub: true,
+          // the footage itself drifts the phone rightward as it plays
+          // (measured ~22% of the frame width by the last frame); shifting
+          // the element left by that same amount means the drift lands
+          // the phone back in the centre exactly as the clip finishes
+          shiftX: -22,
+        },
         text: "To serve both tech-savvy Gen Z/Millennial players and older regulars, we built an accessible interface using high-contrast UI tokens, clear visual feedback, and a streamlined 3-step court selection process.",
+        images: ["/carousel/smash-section4-1.webp", "/carousel/smash-section4-2.webp"],
       },
       {
         type: "bento",
