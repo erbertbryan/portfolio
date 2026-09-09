@@ -1671,6 +1671,21 @@ a {
   padding: clamp(6px, 0.9vw, 10px);
   box-shadow: 0 22px 50px -30px rgba(23, 19, 13, 0.32);
 }
+/* strips the matte-card chrome for media that already frames itself —
+   the SmashHub phone clip renders its own device mockup and drop shadow,
+   so our card border/padding/shadow would be a frame around a frame */
+.story__media-card--bare {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+}
+.story__media-card--bare img,
+.story__media-card--bare video {
+  border: 0;
+  border-radius: 0;
+}
 .story__media-card img,
 .story__media-card video {
   display: block;

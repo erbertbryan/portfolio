@@ -83,6 +83,12 @@ function mediaTag(item) {
     return `<img src="${item}" alt="" loading="lazy" decoding="async" />`;
   }
   const poster = item.poster ? ` poster="${item.poster}"` : "";
+  if (item.playOnScroll) {
+    // no autoplay/loop here — initScrollVideos starts it once, when the
+    // clip scrolls into view, and with nothing to loop it just holds on
+    // its own last frame when it finishes
+    return `<video src="${item.src}"${poster} muted playsinline preload="metadata" data-play-on-scroll></video>`;
+  }
   return `<video src="${item.src}"${poster} autoplay muted loop playsinline preload="metadata"></video>`;
 }
 
@@ -161,7 +167,12 @@ function storyBodyMarkup(project) {
         </section>`;
       }
       const imgs = s.images
-        .map((item) => `<div class="story__media-card">${mediaTag(item)}</div>`)
+        .map(
+          (item) =>
+            `<div class="story__media-card${
+              typeof item === "object" && item.bare ? " story__media-card--bare" : ""
+            }">${mediaTag(item)}</div>`
+        )
         .join("");
       // "bento" = 2x2 grid, "trio" = one full-width above a matched pair,
       // otherwise a plain vertical stack
@@ -286,6 +297,29 @@ function initCounters(root) {
   });
 }
 
+/* Videos marked data-play-on-scroll skip autoplay and loop — they start
+   once the clip scrolls into view and, with nothing to loop, simply hold
+   on their own last frame when they finish rather than looping forever. */
+function initScrollVideos(root) {
+  const vids = root.querySelectorAll("video[data-play-on-scroll]");
+  if (!vids.length) return;
+  if (REDUCE) return; // the poster frame stands in; nothing to trigger
+
+  const io = new IntersectionObserver(
+    (entries, obs) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const v = entry.target;
+        v.currentTime = 0;
+        v.play().catch(() => {}); // autoplay can still be blocked; the poster covers it
+        obs.unobserve(v);
+      });
+    },
+    { threshold: 0.5 }
+  );
+  vids.forEach((v) => io.observe(v));
+}
+
 export function initDeepDive(root, cards, stack) {
   const byId = new Map(cards.map((c) => [c.project.id, c]));
   let current = null;
@@ -318,6 +352,7 @@ export function initDeepDive(root, cards, stack) {
         btn.addEventListener("click", () => switchTo(btn.dataset.switch));
       });
       initCounters(el);
+      initScrollVideos(el);
     });
 
     history.pushState({ deepdive: id }, "", `#case-${id}`);
@@ -393,6 +428,7 @@ export function initDeepDive(root, cards, stack) {
       toEl.insertAdjacentHTML("beforeend", storyMarkup(toCard.project, others));
       revealHero(toEl);
       initCounters(toEl);
+      initScrollVideos(toEl);
 
       if (REDUCE) {
         animating = false;
@@ -464,6 +500,7 @@ export function initDeepDive(root, cards, stack) {
       btn.addEventListener("click", () => switchTo(btn.dataset.switch));
     });
     initCounters(el);
+    initScrollVideos(el);
     current = match[1];
   }
 }

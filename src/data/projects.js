@@ -246,6 +246,12 @@ export const projects = [
             type: "video",
             src: "/carousel/smash-mobile.mp4",
             poster: "/carousel/smash-mobile-poster.webp",
+            // the clip already renders its own phone mockup on a white
+            // ground, so our card's border/padding/shadow would frame a
+            // frame; play once as it scrolls into view rather than
+            // looping, since it reads as a single deliberate demo beat
+            bare: true,
+            playOnScroll: true,
           },
           "/carousel/smash-section4-1.webp",
           "/carousel/smash-section4-2.webp",
