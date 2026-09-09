@@ -1131,6 +1131,14 @@ a {
      separate sibling element and keeps its usual alternation. */
   background: var(--card);
   border: 1px solid var(--line);
+  /* every other section on the page caps its content at --maxw — this
+     was the one exception, and it's why the hero video looked right in
+     a ~1350px browser pane but ballooned on a real 1920/2560px monitor:
+     .showcase--hero sizes itself as a percentage of this box's own
+     width (see there), which had nothing stopping it from growing past
+     what the frame's fixed height was ever calibrated for. */
+  max-width: var(--maxw);
+  margin: 0 auto;
   --frame-pad-x: clamp(20px, 4vw, 60px);
   padding: clamp(28px, 4vw, 52px) var(--frame-pad-x);
   /* fixed and deliberately short — the video is far taller than this
