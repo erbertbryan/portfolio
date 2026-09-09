@@ -39,10 +39,10 @@ const VIDEOS = new Set(["15", "16", "18"]);
 // swinging too far round the sides.
 const rigFor = (w) =>
   w < 700
-    ? { card: 330, gap: 8, persp: 700, tilt: 2, drift: 0.034, push: 0.5, arc: 70 }
+    ? { card: 360, gap: 8, persp: 760, tilt: 2, drift: 0.034, push: 0.5, arc: 70 }
     : w < 1100
-    ? { card: 435, gap: 10, persp: 880, tilt: 2, drift: 0.03, push: 0.5, arc: 72 }
-    : { card: 590, gap: 12, persp: 1050, tilt: 2, drift: 0.026, push: 0.5, arc: 74 };
+    ? { card: 475, gap: 10, persp: 950, tilt: 2, drift: 0.03, push: 0.5, arc: 72 }
+    : { card: 650, gap: 12, persp: 1140, tilt: 2, drift: 0.026, push: 0.5, arc: 74 };
 
 function makeCard(name) {
   const el = document.createElement("figure");
@@ -105,9 +105,6 @@ function initWheel() {
   let rig = rigFor(window.innerWidth);
   let raf = null;
 
-  // pointer parallax, mirroring the reference's --hero-cursor-* vars
-  let curX = 0;
-  let tgtX = 0;
   // drag-to-spin
   let dragging = false;
   let spin = 0;
@@ -136,12 +133,10 @@ function initWheel() {
       spin = 0;
       angle -= rig.drift;
     }
-    curX += (tgtX - curX) * 0.06;
-
     // push the ring toward the camera so we sit inside the arc
     wheel.style.transform =
       `translateZ(${(radius * rig.push).toFixed(1)}px) rotateX(${rig.tilt.toFixed(2)}deg) ` +
-      `rotateY(${(angle + curX * 5).toFixed(3)}deg)`;
+      `rotateY(${angle.toFixed(3)}deg)`;
 
     // retire whatever swings past the sides / round the back
     for (let i = 0; i < N; i++) {
@@ -218,15 +213,6 @@ function initWheel() {
   wrap.addEventListener("dragstart", (e) => e.preventDefault());
 
   window.addEventListener("resize", layout);
-  if (window.matchMedia("(hover: hover)").matches) {
-    window.addEventListener(
-      "pointermove",
-      (e) => {
-        tgtX = (e.clientX / window.innerWidth) * 2 - 1; // -1..1
-      },
-      { passive: true }
-    );
-  }
 
   const hero = document.querySelector("[data-hero]");
   const io = new IntersectionObserver((e) => (e[0].isIntersecting ? start() : stop()), {

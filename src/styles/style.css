@@ -210,7 +210,7 @@ a {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: clamp(148px, 21vh, 224px) var(--edge) 0;
+  padding: clamp(128px, 18vh, 200px) var(--edge) 0;
   overflow: hidden;
   isolation: isolate;
 }
@@ -292,7 +292,7 @@ a {
   flex: 1 1 auto;
   width: 100vw;
   min-height: clamp(260px, 46vh, 620px);
-  margin-top: clamp(4px, 1vh, 14px);
+  margin-top: 0;
 }
 
 /* 3D screen wheel — shots mounted around a slowly turning cylinder */
@@ -306,9 +306,16 @@ a {
   position: absolute;
   inset: 0;
   display: grid;
-  place-items: center;
-  /* nudge the ring up toward the hero copy */
-  padding-bottom: clamp(40px, 12vh, 160px);
+  /* .wheel itself collapses to zero height (every .shot inside it is
+     position: absolute, so nothing is left in flow to give it one) —
+     centring that zero-height anchor point in a tall stage still left
+     it sitting well below the copy even at this rule's max value.
+     Top-aligning it and controlling the gap with padding-top instead
+     is direct: the anchor sits exactly padding-top below the stage's
+     own top edge, not some indirect fraction of the box's height. */
+  justify-items: center;
+  align-items: start;
+  padding-top: clamp(4px, 2vh, 36px);
   perspective: 1500px;
   perspective-origin: 50% 50%;
   cursor: grab;
