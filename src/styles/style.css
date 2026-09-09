@@ -1124,8 +1124,12 @@ a {
      separate sibling element and keeps its usual alternation. */
   background: var(--card);
   border: 1px solid var(--line);
-  padding: clamp(44px, 6vw, 84px) clamp(20px, 4vw, 60px) clamp(34px, 4vw, 58px);
-  min-height: clamp(500px, 78vh, 820px);
+  padding: clamp(44px, 6vw, 84px) clamp(20px, 4vw, 60px) 0;
+  /* fixed, not a floor: the hero video is deliberately oversized (see
+     .showcase--hero__card) and meant to run off the bottom edge, cropped
+     by this box rather than pushing it taller */
+  height: clamp(500px, 78vh, 820px);
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
@@ -1432,7 +1436,14 @@ a {
    one rigid unit, so nothing can drift out of sync with it. */
 .showcase--hero__card {
   box-sizing: border-box;
-  width: min(1000px, 96%);
+  /* deliberately wider than the frame can hold at its own aspect ratio —
+     .case__frame clips the overflow at its bottom edge, right around the
+     laptop's keyboard, rather than shrinking the video to fit clear.
+     flex-shrink: 0 because .showcase--hero is itself a flex container —
+     without it, the default shrink-to-fit silently cancels this back
+     down to the container's own width, undoing the whole effect. */
+  width: min(1560px, 128%);
+  flex-shrink: 0;
   --hero-tilt: 48deg;
   --hero-scale: 0.92;
   transform: perspective(1400px) rotateX(var(--hero-tilt)) scale(var(--hero-scale));
@@ -1456,7 +1467,10 @@ a {
   align-items: flex-start;
 }
 .case.is-expanded .showcase--hero__card {
-  width: min(1100px, 92%);
+  /* same deliberately-oversized width as the closed card (base rule),
+     so the deep dive's cover crops the clip the same way rather than
+     shrinking it back down to fit clear once the tilt goes away */
+  width: min(1560px, 128%);
   --hero-tilt: 0deg;
   --hero-scale: 1;
   opacity: 1;
