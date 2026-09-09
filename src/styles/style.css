@@ -1808,14 +1808,17 @@ a {
   margin-bottom: 0;
 }
 @media (max-width: 760px) {
+  /* one stat per row, full width, instead of the 2-up grid — with an
+     odd count (3 is the common case) that grid left the last stat alone
+     on its own row, sitting off in the left column instead of centred. */
   .story__stats {
     grid-auto-flow: row;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
   }
-  .story__stat:nth-child(odd) {
+  .story__stat {
     border-left: 0;
   }
-  .story__stat:nth-child(n + 3) {
+  .story__stat + .story__stat {
     border-top: 1px solid var(--line);
   }
 }
