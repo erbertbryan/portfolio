@@ -1128,7 +1128,7 @@ a {
   /* fixed, not a floor: the hero video is deliberately oversized (see
      .showcase--hero__card) and meant to run off the bottom edge, cropped
      by this box rather than pushing it taller */
-  height: clamp(560px, 90vh, 960px);
+  height: clamp(560px, 90vh, 1180px);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -1197,6 +1197,13 @@ a {
   text-transform: uppercase;
   color: var(--ink);
   margin-top: clamp(16px, 2.4vw, 32px);
+  /* reserves 2 lines' worth of height always, one-line titles included —
+     the hero video below is top-aligned and just grows downward from
+     wherever this block ends, so a title that wraps to two lines on one
+     project and one line on another was leaving noticeably less of the
+     video visible above the frame's crop line on the two-line project.
+     Same line-height (0.92) both places, so this is exactly 2 lines. */
+  min-height: 1.84em;
 }
 .case__tags {
   display: flex;
@@ -1442,7 +1449,7 @@ a {
      flex-shrink: 0 because .showcase--hero is itself a flex container —
      without it, the default shrink-to-fit silently cancels this back
      down to the container's own width, undoing the whole effect. */
-  width: min(1560px, 128%);
+  width: min(1750px, 140%);
   flex-shrink: 0;
   --hero-tilt: 48deg;
   --hero-scale: 0.92;
@@ -1454,6 +1461,14 @@ a {
 .showcase--hero__card video {
   display: block;
   width: 100%;
+  /* the laptop mockup in every one of these clips sits ~1.3% right of
+     its own canvas's centre (checked directly against all 5 source
+     files) — small enough to miss when the card was smaller, obvious
+     now that it's this large. No clip risk nudging it back: the card
+     has no overflow:hidden of its own, and both it and the page behind
+     it are the same solid white, so this has nowhere visible to bleed
+     into. */
+  transform: translateX(-1.3%);
 }
 /* scrolled into view: lies flat like a tablet on a table, then rises
    upright — see initHeroReveal() in works.js, which adds this class
@@ -1463,14 +1478,11 @@ a {
   --hero-scale: 1;
   opacity: 1;
 }
-.case.is-expanded .showcase--hero {
-  align-items: flex-start;
-}
 .case.is-expanded .showcase--hero__card {
   /* same deliberately-oversized width as the closed card (base rule),
      so the deep dive's cover crops the clip the same way rather than
      shrinking it back down to fit clear once the tilt goes away */
-  width: min(1560px, 128%);
+  width: min(1750px, 140%);
   --hero-tilt: 0deg;
   --hero-scale: 1;
   opacity: 1;
@@ -2056,6 +2068,14 @@ a {
     min-height: clamp(500px, 78vh, 820px);
     overflow: visible;
     padding-bottom: clamp(34px, 4vw, 58px);
+  }
+  /* the desktop card is deliberately wider than its container (128-140%)
+     to force the crop — at a narrow viewport that overshoots the actual
+     screen edge, not just the frame, forcing a page-wide horizontal
+     scrollbar (confirmed: 13px of real scroll on a 375px width). Nothing
+     here needs to bleed at this size in the first place. */
+  .showcase--hero__card {
+    width: min(1000px, 96%);
   }
 }
 
