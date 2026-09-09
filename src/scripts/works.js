@@ -122,9 +122,11 @@ export function initWorks() {
 }
 
 /* hero-screenshot showcases lie flat (tilted back in 3D) and rise upright
-   whenever they scroll into view, resetting when scrolled back out — see
-   .showcase--hero.is-revealed in style.css. Skipped while a deep dive has
-   this card expanded, since that state has its own fixed pose. */
+   the first time they scroll into view, then hold that pose for good —
+   see .showcase--hero.is-revealed in style.css. Each target stops being
+   observed the moment it reveals, so scrolling back up past it later
+   can't lay it back down again. Skipped while a deep dive has this card
+   expanded, since that state has its own fixed pose. */
 function initHeroReveal(root) {
   const targets = root.querySelectorAll(".showcase--hero");
   if (!targets.length) return;
@@ -133,10 +135,12 @@ function initHeroReveal(root) {
     return;
   }
   const io = new IntersectionObserver(
-    (entries) => {
+    (entries, obs) => {
       entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
         if (entry.target.closest(".case.is-expanded, .case.is-settling")) return;
-        entry.target.classList.toggle("is-revealed", entry.isIntersecting);
+        entry.target.classList.add("is-revealed");
+        obs.unobserve(entry.target);
       });
     },
     { threshold: 0.2, rootMargin: "0px 0px -10% 0px" }

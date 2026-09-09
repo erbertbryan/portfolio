@@ -2,18 +2,22 @@
    Deep dive — expands a case card in place into a full case-study
    page: no navigation, no loading state.
 
-   This is a CROSSFADE, deliberately not a scale/FLIP transform: the
-   card's content (logo, big title, tags, mockup) genuinely changes
-   size and layout between the closed and expanded states, and scaling
-   a box that contains text and images stretches and distorts them —
-   that was tried first and looked bad. Instead: fade the content out,
-   swap the layout while it's invisible (instant, but unseen), fade
-   the new layout in. Nothing ever gets scaled.
+   Opening/closing is a staged transition, not a crossfade: the nav
+   slides up, the card itself FLIPs (First/Last/Invert/Play) from its
+   spot in the list up to filling the screen, then the Back pill slides
+   down into place. A scale-based FLIP used to distort the card's
+   content because the expanded hero was laid out smaller than the
+   closed card — now that .case.is-expanded deliberately reuses the
+   same .case__frame/.case__title sizing as the closed state (see
+   style.css), the two only differ by the CTA swapping for Back and the
+   story continuing underneath, so scaling the whole card as one rigid
+   unit during the FLIP no longer stretches anything out of shape.
 
    Only the "Back" pill stays pinned as you scroll — the header itself
-   scrolls away like the rest of the page. "Back" reverses the same
-   crossfade; switching between two open deep dives crossfades directly
-   from one to the other without visiting the closed-card state.
+   scrolls away like the rest of the page. Switching between two open
+   deep dives still crossfades directly from one to the other (their
+   content genuinely differs card to card, and neither the nav nor the
+   list position is involved), never visiting the closed-card state.
    ------------------------------------------------------------ */
 
 import { showcase } from "./works.js";
@@ -21,38 +25,91 @@ import { showcase } from "./works.js";
 const REDUCE = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const FADE_OUT = REDUCE ? 0 : 220;
 const FADE_IN = REDUCE ? 0 : 360;
+const NAV_MS = REDUCE ? 0 : 320;
+const FLIP_MS = REDUCE ? 0 : 620;
+const BACK_MS = REDUCE ? 0 : 300;
 
 const ARROW_FWD = '<svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg>';
 
-/* fade `el` to opacity 0, run `swap` while invisible, fade back to 1.
-   Returns a promise that resolves once the fade-in finishes. */
-function crossfade(el, swap) {
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/* FLIP: measure el's current on-screen box, run `apply` (expected to
+   change el into its new layout synchronously — e.g. toggling
+   .is-expanded), measure the resulting box, then animate a transform
+   from the old box to the new one so el visually grows or shrinks
+   between the two instead of jump-cutting. Direction-agnostic: works
+   the same whether `apply` is the open change or the close change. */
+function flip(el, apply) {
   return new Promise((resolve) => {
+    const first = el.getBoundingClientRect();
+    apply();
     if (REDUCE) {
-      swap();
       resolve();
       return;
     }
-    el.style.transition = `opacity ${FADE_OUT}ms ease, transform ${FADE_OUT}ms ease`;
-    el.style.transform = "translateY(-8px)";
-    el.style.opacity = "0";
+    void el.offsetWidth;
+    const last = el.getBoundingClientRect();
+    const dx = first.left - last.left;
+    const dy = first.top - last.top;
+    const sx = first.width / last.width;
+    const sy = first.height / last.height;
 
+    el.style.transformOrigin = "top left";
+    el.style.transition = "none";
+    el.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
+    void el.offsetWidth;
+    requestAnimationFrame(() => {
+      el.style.transition = `transform ${FLIP_MS}ms var(--ease)`;
+      el.style.transform = "none";
+      setTimeout(() => {
+        el.style.transition = "";
+        el.style.transform = "";
+        el.style.transformOrigin = "";
+        resolve();
+      }, FLIP_MS);
+    });
+  });
+}
+
+function slideNav(hide) {
+  document.querySelector(".nav")?.classList.toggle("is-hidden", hide);
+}
+
+/* the Back pill's resting show/hide is the .is-expanded display toggle
+   in style.css — these two only drive the brief transition between
+   those resting states, sliding it down into its pinned spot as a deep
+   dive opens and back up out of the way as one closes. */
+function slideBackIn(backWrap) {
+  return new Promise((resolve) => {
+    if (!backWrap || REDUCE) {
+      resolve();
+      return;
+    }
+    backWrap.style.display = "block";
+    backWrap.style.transition = "none";
+    backWrap.style.transform = "translateY(-100%)";
+    void backWrap.offsetWidth;
+    requestAnimationFrame(() => {
+      backWrap.style.transition = "";
+      backWrap.style.transform = "";
+      setTimeout(resolve, BACK_MS);
+    });
+  });
+}
+function slideBackOut(backWrap) {
+  return new Promise((resolve) => {
+    if (!backWrap || REDUCE) {
+      resolve();
+      return;
+    }
+    backWrap.style.transition = `transform ${BACK_MS}ms var(--ease)`;
+    backWrap.style.transform = "translateY(-100%)";
     setTimeout(() => {
-      swap();
-      void el.offsetWidth; // commit the swap before animating back in
-      el.style.transition = "none";
-      el.style.transform = "translateY(10px)";
-      requestAnimationFrame(() => {
-        el.style.transition = `opacity ${FADE_IN}ms ease, transform ${FADE_IN}ms ease`;
-        el.style.opacity = "1";
-        el.style.transform = "none";
-        setTimeout(() => {
-          el.style.transition = "";
-          el.style.transform = "";
-          resolve();
-        }, FADE_IN);
-      });
-    }, FADE_OUT);
+      backWrap.style.display = "none";
+      backWrap.style.transition = "";
+      backWrap.style.transform = "";
+      resolve();
+    }, BACK_MS);
   });
 }
 
@@ -434,7 +491,7 @@ export function initDeepDive(root, cards, stack) {
   let current = null;
   let animating = false;
 
-  function open(id) {
+  async function open(id) {
     if (animating || current === id) return;
     const card = byId.get(id);
     if (!card) return;
@@ -443,33 +500,40 @@ export function initDeepDive(root, cards, stack) {
 
     const { el, project } = card;
     const others = cards.filter((c) => c.project.id !== id);
+    const backWrap = el.querySelector(".case__back-wrap");
+
+    history.pushState({ deepdive: id }, "", `#case-${id}`);
+
+    stack.pause(); // stop it fighting for el.style.transform mid-FLIP
+    slideNav(true);
+
+    await wait(NAV_MS);
 
     root.classList.add("has-expanded");
     others.forEach((c) => c.el.classList.add("is-hidden"));
-    stack.pause();
     document.body.classList.add("no-scroll");
 
-    crossfade(el, () => {
+    await flip(el, () => {
       el.classList.add("is-expanded");
       el.insertAdjacentHTML("beforeend", storyMarkup(project, others));
       revealHero(el);
-    }).then(() => {
-      animating = false;
-      const story = el.querySelector("[data-story]");
-      requestAnimationFrame(() => story.classList.add("is-in"));
-      el.querySelectorAll("[data-switch]").forEach((btn) => {
-        btn.addEventListener("click", () => switchTo(btn.dataset.switch));
-      });
-      initCounters(el);
-      initScrubVideos(el);
-      initShiftedMedia(el);
     });
 
-    history.pushState({ deepdive: id }, "", `#case-${id}`);
+    await slideBackIn(backWrap);
+
+    animating = false;
+    const story = el.querySelector("[data-story]");
+    requestAnimationFrame(() => story.classList.add("is-in"));
+    el.querySelectorAll("[data-switch]").forEach((btn) => {
+      btn.addEventListener("click", () => switchTo(btn.dataset.switch));
+    });
+    initCounters(el);
+    initScrubVideos(el);
+    initShiftedMedia(el);
   }
 
-  function close({ pushState = true } = {}) {
-    if (animating || !current) return Promise.resolve();
+  async function close({ pushState = true } = {}) {
+    if (animating || !current) return;
     const card = byId.get(current);
     animating = true;
     current = null;
@@ -477,6 +541,7 @@ export function initDeepDive(root, cards, stack) {
     const { el } = card;
     const story = el.querySelector("[data-story]");
     if (story) story.classList.remove("is-in");
+    const backWrap = el.querySelector(".case__back-wrap");
 
     // covers the whole close transition, not just its two endpoints —
     // keeps the hero-reveal observer (works.js) from reading a transient
@@ -484,25 +549,32 @@ export function initDeepDive(root, cards, stack) {
     // expanded layout and un-revealing an image the user was just looking at
     el.classList.add("is-settling");
 
-    const done = crossfade(el, () => {
+    if (pushState) {
+      const base = location.pathname + location.search;
+      history.pushState({}, "", `${base}#works`);
+    }
+
+    // mirrors open()'s sequence in reverse: Back leaves first, then the
+    // card shrinks back down to its spot in the list, then the nav
+    // returns — each stage only makes sense once the previous is clear
+    await slideBackOut(backWrap);
+
+    await flip(el, () => {
       el.classList.remove("is-expanded");
       story?.remove();
       root.classList.remove("has-expanded");
       cards.forEach((c) => c.el.classList.remove("is-hidden"));
       revealHero(el);
-    }).then(() => {
-      animating = false;
-      stack.resume();
-      document.body.classList.remove("no-scroll");
-      revealHero(el);
-      el.classList.remove("is-settling");
     });
 
-    if (pushState) {
-      const base = location.pathname + location.search;
-      history.pushState({}, "", `${base}#works`);
-    }
-    return done;
+    document.body.classList.remove("no-scroll");
+    stack.resume();
+    slideNav(false);
+    await wait(NAV_MS);
+
+    animating = false;
+    revealHero(el);
+    el.classList.remove("is-settling");
   }
 
   /* crossfades directly from one open deep dive to another — never

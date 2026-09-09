@@ -98,6 +98,13 @@ a {
   padding: clamp(14px, 2vw, 22px) var(--edge);
   transition: transform 0.6s var(--ease);
 }
+/* opening a deep dive: the site nav slides up out of the way before the
+   card underneath it expands to fill the screen — see initDeepDive()'s
+   open()/close() in deepdive.js, which is also what swaps it back in
+   as the expanded card shrinks back down to its spot in the list. */
+.nav.is-hidden {
+  transform: translateY(-130%);
+}
 .nav__inner {
   max-width: var(--maxw);
   margin: 0 auto;
@@ -1138,7 +1145,8 @@ a {
      (see .case .showcase--hero) so there's nothing left for an unbounded
      width to balloon. */
   --frame-pad-x: clamp(20px, 4vw, 60px);
-  padding: clamp(28px, 4vw, 52px) var(--frame-pad-x);
+  --frame-pad-y: clamp(28px, 4vw, 52px);
+  padding: var(--frame-pad-y) var(--frame-pad-x);
   /* fills the screen below the sticky offset — each project is meant to
      read as its own full-height beat, not a short strip, and stays that
      way no matter how tall the window gets, down to a floor for short
@@ -1312,6 +1320,11 @@ a {
   z-index: 50;
   padding: clamp(16px, 2.4vw, 26px) clamp(20px, 4vw, 60px);
   pointer-events: none;
+  /* the resting show/hide is the display toggle below; this transition
+     only matters for the brief window where deepdive.js drives it from
+     display:block manually — sliding it down into place as a deep dive
+     opens, and back up as one closes. See initDeepDive(). */
+  transition: transform 0.45s var(--ease);
 }
 .case.is-expanded .case__back-wrap {
   display: block;
@@ -1581,30 +1594,15 @@ a {
   background: var(--paper);
 }
 /* the header itself is NOT pinned — it scrolls away with the rest of
-   the page, only .case__back-wrap above stays put */
+   the page, only .case__back-wrap above stays put. Everything else
+   about the frame — height, padding, title size, tag spacing — is
+   deliberately left to inherit the base .case__frame/.case__title
+   rules unchanged: the deep-dive hero is meant to read as the exact
+   same card, just with the CTA swapped for the pinned Back button and
+   the story continuing underneath, not a shrunk-down restatement of it. */
 .case.is-expanded .case__frame {
   position: relative;
   z-index: 1;
-  min-height: 0;
-  padding: clamp(8px, 1.4vw, 16px) clamp(20px, 4vw, 60px) clamp(20px, 2.6vw, 28px);
-  /* not the page's off-white paper this used to be, before the hero
-     became a clip that renders its own white canvas — same reasoning
-     as the base .case__frame rule, just never carried over to this
-     override, so the deep dive alone still showed the old mismatch */
-  background: var(--card);
-}
-/* the graphic shrinks a little and the frame gets shorter — the
-   headline itself stays big and confident, just not full-hero size */
-.case.is-expanded .case__title {
-  /* smaller than the base card's, not bigger — this shares its column
-     with the video exactly like the closed card does, and the base
-     size was already tuned to fit an 0.8fr column without wrapping
-     awkwardly or, worse, overflowing past .case__frame's clipped edge */
-  font-size: clamp(1.7rem, 2.8vw, 2.8rem);
-  margin-top: clamp(10px, 1.6vw, 20px);
-}
-.case.is-expanded .case__tags {
-  margin-top: clamp(10px, 1.4vw, 16px);
 }
 .case.is-expanded .case__cta {
   display: none; /* replaced by the pinned .case__back above */
@@ -2110,8 +2108,13 @@ a {
   transition-delay: 0.32s;
 }
 
-@media (max-width: 760px) {
-  /* The desktop hero is a short, fixed-height frame with the video
+@media (max-width: 1024px) {
+  /* Covers iPad (both orientations) and any narrow-desktop window down
+     to tablet width, not just phones — the desktop hero's absolute
+     positioning has no width of its own to fall back on below full
+     desktop widths, so it either overlaps the copy or runs past the
+     frame's edge well before 760px. The desktop hero is a short,
+     fixed-height frame with the video
      positioned over the text and cropped by the frame's edges. None of
      that survives a phone: text stacks above the video, both centred,
      and the video goes back into normal flow at its natural size so
@@ -2136,12 +2139,18 @@ a {
   }
   .case .showcase--hero {
     position: static;
-    width: 100%;
+    /* bleeds out past the frame's own padding on all three free sides,
+       flush to its true edges — same idea as the desktop treatment.
+       Padded and merely sitting above the frame's bottom edge read as
+       an accidental crop with dead space after it; flush reads as
+       deliberate, the same way it already does on desktop. */
+    width: calc(100% + 2 * var(--frame-pad-x));
     height: auto;
     right: auto;
     top: auto;
+    margin: clamp(24px, 5vw, 40px) calc(-1 * var(--frame-pad-x))
+      calc(-1 * var(--frame-pad-y));
     transform: none;
-    margin-top: clamp(24px, 5vw, 40px);
   }
   /* three fixed columns is too wide to fit a phone — back to wrapping */
   .case__tags {
@@ -2150,8 +2159,9 @@ a {
     justify-content: center;
   }
   .showcase--hero__card {
-    width: min(1000px, 96%);
-    max-width: 96%;
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
   }
 }
 
