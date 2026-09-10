@@ -109,22 +109,39 @@ a {
 .nav__inner {
   max-width: var(--maxw);
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  padding: 10px 14px 10px 18px;
   border-radius: 999px;
+  /* the pill's background/blur transition (is-stuck) and its shape
+     transition (is-menu-open, mobile only) are independent — background
+     reacts to scroll, border-radius reacts to the menu — but both live
+     on this one element, so both are listed here rather than split up */
   transition: background 0.5s var(--ease), box-shadow 0.5s var(--ease),
-    backdrop-filter 0.5s var(--ease);
+    backdrop-filter 0.5s var(--ease), border-radius 0.5s var(--ease);
 }
-.nav.is-stuck .nav__inner {
+.nav.is-stuck .nav__inner,
+.nav.is-menu-open .nav__inner {
   background: color-mix(in srgb, var(--paper) 72%, transparent);
   backdrop-filter: blur(18px) saturate(1.4);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset,
     0 12px 40px -24px rgba(23, 19, 13, 0.5);
 }
+/* a 999px pill radius reads fine at the closed row's height, but stretched
+   over the opened panel's height it bows out into a blob — settle into a
+   plain rounded rectangle instead while it's open */
+.nav.is-menu-open .nav__inner {
+  border-radius: 28px;
+}
+/* the always-visible top row — logo, links/socials on desktop,
+   toggle/calendar on mobile (see the max-width: 900px block) */
+.nav__row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 10px 14px 10px 18px;
+}
 
-/* brand wordmark (inline SVG logo) */
+/* brand wordmark (inline SVG logo) — brand.js injects both the full
+   wordmark and a compact mark-only version (from the favicon art);
+   which one shows is purely a responsive CSS toggle below */
 .brand {
   display: inline-flex;
   align-items: center;
@@ -136,6 +153,9 @@ a {
   width: auto;
   display: block;
   overflow: visible;
+}
+.brand__mark {
+  display: none;
 }
 
 .nav__links {
@@ -207,6 +227,146 @@ a {
   stroke-width: 1.5;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+/* Phosphor icons (regular weight, filled) — the nav's social icons and
+   the mobile menu's Works/Process/About/calendar icons, as opposed to
+   .ic above, the hand-drawn stroke style used elsewhere on the site */
+.ph {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+/* ---- mobile menu (toggle + calendar CTA + the expanding panel) ----
+   Hidden by default; the max-width: 900px block below is what actually
+   shows them, in place of .nav__links/.nav__socials which hide there. */
+.nav__toggle,
+.nav__cal {
+  display: none;
+  position: relative;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 0;
+  padding: 0;
+  background: none;
+  border-radius: 999px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: background 0.4s var(--ease), color 0.4s var(--ease);
+}
+.nav__toggle:hover,
+.nav__cal:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+/* two stacked icons cross-fading/rotating into each other rather than
+   one icon being redrawn — simpler than morphing a shared path, and
+   avoids the redraw looking like a glitch */
+.nav__toggle-icon {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  transition: opacity 0.3s var(--ease), transform 0.35s var(--ease);
+}
+.nav__toggle-icon--close {
+  fill: currentColor;
+  opacity: 0;
+  transform: rotate(-45deg) scale(0.6);
+}
+.nav.is-menu-open .nav__toggle-icon--open {
+  opacity: 0;
+  transform: rotate(45deg) scale(0.6);
+}
+.nav.is-menu-open .nav__toggle-icon--close {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+/* the panel the pill grows to reveal — collapsed by default on every
+   width; only ever gets a chance to open at the mobile breakpoint,
+   since that's the only place .nav__toggle exists to trigger it */
+.nav__expand {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  padding: 0 18px;
+  transition: max-height 0.5s var(--ease), opacity 0.35s var(--ease),
+    padding 0.5s var(--ease);
+}
+.nav.is-menu-open .nav__expand {
+  max-height: 480px;
+  opacity: 1;
+  pointer-events: auto;
+  padding: 4px 18px 22px;
+}
+.nav__expand-links {
+  display: flex;
+  flex-direction: column;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.nav__expand-links a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 4px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--ink);
+  border-bottom: 1px solid var(--line);
+}
+.nav__expand-links a:last-child {
+  border-bottom: 0;
+}
+.nav__expand-ico {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: var(--paper-2);
+  color: var(--ink-soft);
+}
+.nav__expand-ico .ph {
+  width: 16px;
+  height: 16px;
+}
+.nav__expand-eyebrow {
+  margin-top: 18px;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+.nav__expand-socials {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.nav__expand-socials a,
+.nav__expand-socials .nav__ico {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  padding: 0;
+  background: var(--paper-2);
+  border-radius: 999px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: background 0.4s var(--ease), color 0.4s var(--ease);
+}
+.nav__expand-socials a:hover,
+.nav__expand-socials .nav__ico:hover {
+  background: var(--ink);
+  color: var(--paper);
 }
 
 /* ============================================================
@@ -2886,8 +3046,30 @@ body.no-scroll {
    RESPONSIVE
    ============================================================ */
 @media (max-width: 900px) {
-  .nav__links {
+  /* the desktop row (logo | links | socials) becomes logo | toggle |
+     calendar — .nav__links/.nav__socials hide, .nav__toggle/.nav__cal
+     (already in the DOM, just display: none until now) take their grid
+     slots. Tapping the toggle grows .nav__expand below instead of
+     opening a popover — see initNavMenu() in ui.js. */
+  .brand__full {
     display: none;
+  }
+  .brand__mark {
+    display: block;
+  }
+  .nav__links,
+  .nav__socials {
+    display: none;
+  }
+  .nav__toggle {
+    display: grid;
+    grid-column: 2;
+    justify-self: center;
+  }
+  .nav__cal {
+    display: grid;
+    grid-column: 3;
+    justify-self: end;
   }
   .footer__frame {
     grid-template-columns: 1fr;
@@ -2929,12 +3111,6 @@ body.no-scroll {
 }
 
 @media (max-width: 560px) {
-  .nav__inner {
-    grid-template-columns: auto 1fr;
-  }
-  .nav__socials {
-    gap: 2px;
-  }
   .phone--back {
     display: none;
   }

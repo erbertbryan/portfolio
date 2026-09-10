@@ -39,6 +39,39 @@ function initNav() {
   window.addEventListener("scroll", onScroll, { passive: true });
 }
 
+/* mobile nav: tapping the toggle grows the pill in place (no overlay) to
+   reveal the link/social panel. Closes on a second tap, Escape, choosing a
+   link, or a tap outside the nav — same set of exits a popover would get,
+   even though this isn't one. */
+function initNavMenu() {
+  const nav = document.querySelector("[data-nav]");
+  const toggle = nav?.querySelector("[data-nav-toggle]");
+  const panel = nav?.querySelector("[data-nav-expand]");
+  if (!nav || !toggle || !panel) return;
+
+  const setOpen = (open) => {
+    nav.classList.toggle("is-menu-open", open);
+    toggle.setAttribute("aria-expanded", String(open));
+    toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+  };
+
+  toggle.addEventListener("click", () => {
+    setOpen(!nav.classList.contains("is-menu-open"));
+  });
+
+  panel.querySelectorAll("[data-nav-link]").forEach((link) => {
+    link.addEventListener("click", () => setOpen(false));
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && nav.classList.contains("is-menu-open")) setOpen(false);
+  });
+
+  document.addEventListener("click", (e) => {
+    if (nav.classList.contains("is-menu-open") && !nav.contains(e.target)) setOpen(false);
+  });
+}
+
 function initMagnetic() {
   if (window.matchMedia("(hover: none)").matches) return;
   document.querySelectorAll("[data-magnetic]").forEach((el) => {
@@ -115,6 +148,7 @@ export function initUI() {
   splitLines();
   initReveals();
   initNav();
+  initNavMenu();
   initMagnetic();
   initCopy();
   misc();
