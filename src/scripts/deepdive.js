@@ -517,11 +517,16 @@ export function initDeepDive(root, cards, stack) {
 
     await wait(NAV_MS);
 
-    root.classList.add("has-expanded");
-    others.forEach((c) => c.el.classList.add("is-hidden"));
-    document.body.classList.add("no-scroll");
-
+    // all inside apply(), after flipPosition's "first" measurement:
+    // body.no-scroll (overflow: hidden) confuses the browser's own
+    // sticky-position math for the split second it's active before the
+    // rest of this runs — measuring el's "first" rect while it's set
+    // reads back 0 instead of el's true stuck position, which broke
+    // the whole point of this FLIP (see close() for the same fix)
     await flipPosition(el, () => {
+      root.classList.add("has-expanded");
+      others.forEach((c) => c.el.classList.add("is-hidden"));
+      document.body.classList.add("no-scroll");
       el.classList.add("is-expanded");
       el.insertAdjacentHTML("beforeend", storyMarkup(project, others));
       revealHero(el);
@@ -566,6 +571,7 @@ export function initDeepDive(root, cards, stack) {
     // card shrinks back down to its spot in the list, then the nav
     // returns — each stage only makes sense once the previous is clear
     await slideBackOut(backWrap);
+    document.body.classList.remove("no-scroll");
 
     await flipPosition(el, () => {
       el.classList.remove("is-expanded");
@@ -575,7 +581,6 @@ export function initDeepDive(root, cards, stack) {
       revealHero(el);
     });
 
-    document.body.classList.remove("no-scroll");
     stack.resume();
     slideNav(false);
     await wait(NAV_MS);

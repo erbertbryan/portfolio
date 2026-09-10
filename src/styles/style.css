@@ -1331,8 +1331,19 @@ a {
    scroll away normally */
 .case__back-wrap {
   display: none;
-  position: sticky;
+  /* fixed, not sticky: .case.is-expanded is itself position:fixed;
+     inset:0, so this still reads as pinned to the top of the deep dive
+     exactly like sticky would — but critically, a fixed box never
+     reserves space in the flow the way a sticky one does. With sticky,
+     the instant deepdive.js flips this to display:block (to animate it
+     in), it claims its box height immediately, shoving .case__frame
+     down a beat before the slide even starts — the frame arrives, then
+     visibly jumps. Fixed removes it from flow entirely, so toggling it
+     can never move anything else. */
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 50;
   padding: clamp(16px, 2.4vw, 26px) clamp(20px, 4vw, 60px);
   pointer-events: none;
