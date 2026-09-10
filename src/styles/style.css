@@ -233,6 +233,7 @@ a {
   flex: 0 0 auto;
 }
 .hero__cta {
+  position: relative; /* anchors .hero__cta-sparkles below */
   margin-top: clamp(22px, 3vw, 34px);
   display: inline-flex;
   align-items: center;
@@ -289,6 +290,107 @@ a {
 @keyframes cta-spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* a scatter of small stars around the pill that pop and twinkle out on
+   hover — the single icon spinning was a nice touch but reads as one
+   small motion on an otherwise static button; this is the "something
+   happened" moment the CTA is meant to earn. Each is a copy of the
+   same star used above and inside it (see index.html), just smaller
+   and scattered by hand rather than positioned by any formula — a
+   believable scatter, not a grid. Pure CSS: the animation only runs
+   while :hover matches, so leaving and re-entering always replays it
+   from the start rather than resuming mid-flight. */
+.hero__cta-sparkles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.hero__sparkle {
+  position: absolute;
+  display: block;
+  width: 9px;
+  height: 9px;
+  opacity: 0;
+  transform: scale(0) rotate(0deg);
+  color: var(--yellow);
+}
+.hero__sparkle svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--yellow) 80%, transparent));
+}
+.hero__sparkle--1 {
+  top: -8px;
+  left: 22%;
+  width: 7px;
+  height: 7px;
+}
+.hero__sparkle--2 {
+  top: 4px;
+  left: -12px;
+  width: 11px;
+  height: 11px;
+}
+.hero__sparkle--3 {
+  top: -12px;
+  right: 26%;
+  width: 8px;
+  height: 8px;
+}
+.hero__sparkle--4 {
+  bottom: -9px;
+  right: 16%;
+  width: 10px;
+  height: 10px;
+}
+.hero__sparkle--5 {
+  top: 45%;
+  right: -13px;
+  width: 7px;
+  height: 7px;
+}
+.hero__cta:hover .hero__sparkle {
+  animation: sparkle-pop 850ms var(--ease) forwards;
+}
+.hero__cta:hover .hero__sparkle--1 {
+  animation-delay: 0ms;
+}
+.hero__cta:hover .hero__sparkle--2 {
+  animation-delay: 110ms;
+}
+.hero__cta:hover .hero__sparkle--3 {
+  animation-delay: 190ms;
+}
+.hero__cta:hover .hero__sparkle--4 {
+  animation-delay: 70ms;
+}
+.hero__cta:hover .hero__sparkle--5 {
+  animation-delay: 260ms;
+}
+@keyframes sparkle-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  35% {
+    opacity: 1;
+    transform: scale(1.2) rotate(80deg);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(0.85) rotate(150deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.15) rotate(210deg) translateY(-7px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero__cta:hover .hero__sparkle {
+    animation: none;
   }
 }
 

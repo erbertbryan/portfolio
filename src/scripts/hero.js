@@ -224,7 +224,66 @@ function initWheel() {
   start();
 }
 
+/* ---------------- headline scramble ----------------
+   Hovering a [data-scramble] line decodes it: every character races
+   through random glyphs before locking to its real one, left to
+   right, like the line is resolving itself rather than just changing.
+   Runs on the line's own text — not a second, different string — so
+   leaving it mid-decode and re-entering just replays the same reveal. */
+const SCRAMBLE_CHARS = "!<>-_\\/[]{}=+*^?#";
+
+function scrambleInto(el, text, frame) {
+  let out = "";
+  let done = 0;
+  for (let i = 0; i < text.length; i++) {
+    const reveal = frame.reveal[i];
+    if (frame.n >= reveal) {
+      done++;
+      out += text[i];
+    } else if (text[i] === " ") {
+      done++; // spaces never scramble — a flickering gap reads as a glitch, not a word
+      out += " ";
+    } else {
+      out += SCRAMBLE_CHARS[(Math.random() * SCRAMBLE_CHARS.length) | 0];
+    }
+  }
+  el.textContent = out;
+  return done === text.length;
+}
+
+function initScramble(root) {
+  const lines = root.querySelectorAll("[data-scramble]");
+  if (!lines.length) return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  lines.forEach((el) => {
+    const text = el.textContent;
+    let raf = null;
+
+    const run = () => {
+      if (raf) cancelAnimationFrame(raf);
+      // each character starts revealing at its own frame, staggered
+      // left to right, so the decode visibly sweeps across the line
+      // instead of every character landing at once
+      const frame = {
+        n: 0,
+        reveal: Array.from(text, (_, i) => 6 + i * 2 + ((Math.random() * 4) | 0)),
+      };
+      const tick = () => {
+        const finished = scrambleInto(el, text, frame);
+        frame.n++;
+        if (!finished) raf = requestAnimationFrame(tick);
+        else raf = null;
+      };
+      tick();
+    };
+
+    el.addEventListener("mouseenter", run);
+  });
+}
+
 export function initHero() {
   initWheel();
   initAvatar();
+  initScramble(document);
 }

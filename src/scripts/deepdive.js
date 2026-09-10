@@ -284,7 +284,7 @@ function storyMarkup(project, others) {
           : o.logo
       }</span>
         <span class="story__row-title">${o.name}</span>
-        <span class="story__row-cta"><span>Deep dive</span> ${ARROW_FWD}</span>
+        <span class="story__row-cta"><span>View project</span> ${ARROW_FWD}</span>
       </button>`
     )
     .join("");
