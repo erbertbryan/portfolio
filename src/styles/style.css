@@ -1553,7 +1553,13 @@ a {
 .case .showcase--hero {
   position: absolute;
   z-index: 1;
-  top: 50%;
+  /* top-anchored, not centred: the card is taller than the frame, so
+     centring could crop either edge depending on viewport, and the
+     top edge (the laptop's own bezel) is the one that must never
+     crop — only the bottom (keyboard/base, already the intended
+     bleed edge) should ever run past the frame. A small fixed offset
+     off the frame's own top guarantees that regardless of height. */
+  top: clamp(8px, 1.6vh, 26px);
   /* fixed placement, sized straight off the viewport rather than off
      any ancestor box — that was the source of every earlier version of
      this bug, whether the ancestor's width was unbounded (ballooned on
@@ -1564,8 +1570,6 @@ a {
      the video's own intrinsic ratio, same as it always has. */
   right: calc(-1 * var(--frame-pad-x));
   width: clamp(620px, max(76vw, 108vh), 1560px);
-  /* nudged down from dead centre — see .showcase--hero__card */
-  transform: translateY(calc(-50% + clamp(14px, 2.4vh, 34px)));
   margin-top: 0;
   display: block;
 }
