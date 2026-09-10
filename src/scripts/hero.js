@@ -225,11 +225,11 @@ function initWheel() {
 }
 
 /* ---------------- headline scramble ----------------
-   Hovering a [data-scramble] line decodes it: every character races
-   through random glyphs before locking to its real one, left to
-   right, like the line is resolving itself rather than just changing.
-   Runs on the line's own text — not a second, different string — so
-   leaving it mid-decode and re-entering just replays the same reveal. */
+   Hovering (or focusing) the "Book a call" CTA scrambles each
+   [data-scramble] headline line into its data-hover-text — every
+   character races through random glyphs before locking to its real
+   one, left to right, like the line is resolving itself rather than
+   just changing. Leaving swaps it back the same way. */
 const SCRAMBLE_CHARS = "!<>-_\\/[]{}=+*^?#";
 
 function scrambleInto(el, text, frame) {
@@ -252,15 +252,17 @@ function scrambleInto(el, text, frame) {
 }
 
 function initScramble(root) {
+  const cta = root.querySelector(".hero__cta");
   const lines = root.querySelectorAll("[data-scramble]");
-  if (!lines.length) return;
+  if (!cta || !lines.length) return;
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-  lines.forEach((el) => {
-    const text = el.textContent;
+  const scramblers = [...lines].map((el) => {
+    const defaultText = el.textContent;
+    const hoverText = el.dataset.hoverText || defaultText;
     let raf = null;
 
-    const run = () => {
+    const setText = (text) => {
       if (raf) cancelAnimationFrame(raf);
       // each character starts revealing at its own frame, staggered
       // left to right, so the decode visibly sweeps across the line
@@ -278,8 +280,16 @@ function initScramble(root) {
       tick();
     };
 
-    el.addEventListener("mouseenter", run);
+    return { defaultText, hoverText, setText };
   });
+
+  const toHover = () => scramblers.forEach((s) => s.setText(s.hoverText));
+  const toDefault = () => scramblers.forEach((s) => s.setText(s.defaultText));
+
+  cta.addEventListener("mouseenter", toHover);
+  cta.addEventListener("mouseleave", toDefault);
+  cta.addEventListener("focus", toHover);
+  cta.addEventListener("blur", toDefault);
 }
 
 export function initHero() {
