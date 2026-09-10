@@ -238,24 +238,37 @@ function initWheel() {
    colour immediately — the colour change has to land in the same
    frame as the reveal, not fade in after it. */
 const SCRAMBLE_CHARS = "!<>-_\\/[]{}=+*^?#";
+// timed in ms, not rAF ticks — a raw frame-count version of this ran
+// noticeably faster on a high refresh-rate display (this machine's
+// browser fires rAF every ~6ms, not the ~16.67ms a frame count assumes,
+// so counting frames instead of elapsed time played the whole thing
+// back nearly 3x too fast — fast enough to read as an accident rather
+// than an effect). Real elapsed time plays at the same speed everywhere.
+const GLYPH_HOLD_MS = 55; // how long one glyph sits before re-rolling — a decode, not a flicker
+const REVEAL_BASE_MS = 260; // delay before the first character can lock in
+const REVEAL_STAGGER_MS = 80; // added per character, so the reveal visibly sweeps left to right
+const REVEAL_JITTER_MS = 80; // +random per character, so the sweep isn't a metronome
 
 function escapeHtml(s) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-function scrambleInto(el, text, frame) {
+function scrambleInto(el, text, elapsed, state) {
   let out = "";
   let done = 0;
   for (let i = 0; i < text.length; i++) {
-    if (frame.n >= frame.reveal[i] || text[i] === " ") {
+    if (elapsed >= state.reveal[i] || text[i] === " ") {
       // revealed (or a space, which never scrambles — a flickering
       // gap reads as a glitch, not a word): plain text, instantly the
       // title's own colour, no separate transition to wait on
       done++;
       out += escapeHtml(text[i]);
     } else {
-      const ch = SCRAMBLE_CHARS[(Math.random() * SCRAMBLE_CHARS.length) | 0];
-      out += `<span class="hero__glyph">${ch}</span>`;
+      if (state.glyphs[i] === undefined || elapsed - state.rolledAt[i] >= GLYPH_HOLD_MS) {
+        state.glyphs[i] = SCRAMBLE_CHARS[(Math.random() * SCRAMBLE_CHARS.length) | 0];
+        state.rolledAt[i] = elapsed;
+      }
+      out += `<span class="hero__glyph">${state.glyphs[i]}</span>`;
     }
   }
   el.innerHTML = out;
@@ -280,20 +293,24 @@ function initScramble(root) {
         el.textContent = ""; // a removal — nothing to reveal, so nothing to animate
         return;
       }
-      // each character starts revealing at its own frame, staggered
+      // each character starts revealing at its own moment, staggered
       // left to right, so the decode visibly sweeps across the word
       // instead of every character landing at once
-      const frame = {
-        n: 0,
-        reveal: Array.from(text, (_, i) => 6 + i * 2 + ((Math.random() * 4) | 0)),
+      const state = {
+        glyphs: [],
+        rolledAt: [],
+        reveal: Array.from(
+          text,
+          (_, i) => REVEAL_BASE_MS + i * REVEAL_STAGGER_MS + Math.random() * REVEAL_JITTER_MS
+        ),
       };
-      const tick = () => {
-        const finished = scrambleInto(el, text, frame);
-        frame.n++;
+      const start = performance.now();
+      const tick = (now) => {
+        const finished = scrambleInto(el, text, now - start, state);
         if (!finished) raf = requestAnimationFrame(tick);
         else raf = null;
       };
-      tick();
+      raf = requestAnimationFrame(tick);
     };
 
     return { defaultText, hoverText, setText };
