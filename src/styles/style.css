@@ -1593,14 +1593,22 @@ a {
 /* scrolled into view: lies flat like a tablet on a table, then rises
    upright — see initHeroReveal() in works.js, which adds this class
    once via IntersectionObserver and never removes it */
+/* >1 on purpose: every one of these clips carries its own white
+   canvas around the actual mockup (room for the reveal tilt), so at
+   true scale the card's box is flush to the frame edges but the
+   mockup itself still sits well short of them, reading as a big empty
+   margin around it. Zooming in from transform-origin's 50% 100% (see
+   .showcase--hero__card) crops that canvas away symmetrically at the
+   sides and top, clipped by .case__frame's own overflow: hidden — the
+   bottom edge, already flush, doesn't move. */
 .showcase--hero.is-revealed .showcase--hero__card {
   --hero-tilt: 0deg;
-  --hero-scale: 1;
+  --hero-scale: 1.25;
   opacity: 1;
 }
 .case.is-expanded .showcase--hero__card {
   --hero-tilt: 0deg;
-  --hero-scale: 1;
+  --hero-scale: 1.15;
   opacity: 1;
 }
 /* Opening or closing a deep dive must NOT replay the scroll reveal — the
@@ -1705,7 +1713,7 @@ a {
        header shrinks the frame to half but the text was shrinking
        much further than that, leaving it looking lost in the space
        rather than reading as a smaller version of the same card */
-    font-size: clamp(1.6rem, 3.2vw, 2.6rem);
+    font-size: clamp(1.8rem, 3.7vw, 3rem);
   }
   .case.is-expanded .showcase--hero {
     /* bottom-anchored instead of vertically centered — centering was
