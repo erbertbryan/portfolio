@@ -1553,13 +1553,14 @@ a {
 .case .showcase--hero {
   position: absolute;
   z-index: 1;
-  /* top-anchored, not centred: the card is taller than the frame, so
-     centring could crop either edge depending on viewport, and the
-     top edge (the laptop's own bezel) is the one that must never
-     crop — only the bottom (keyboard/base, already the intended
-     bleed edge) should ever run past the frame. A small fixed offset
-     off the frame's own top guarantees that regardless of height. */
-  top: clamp(8px, 1.6vh, 26px);
+  /* pinned at a fixed fraction of the frame's own height, not centred
+     and not flush to the top either: centring could crop either edge
+     depending on viewport, but anchoring right at the top let the
+     video's own height run down past the title and overlap it. This
+     sits low enough to clear the text column, while still being a
+     fixed point (not "however tall this video happens to be / 2") so
+     the top edge stays predictable and never crops. */
+  top: 42%;
   /* fixed placement, sized straight off the viewport rather than off
      any ancestor box — that was the source of every earlier version of
      this bug, whether the ancestor's width was unbounded (ballooned on
