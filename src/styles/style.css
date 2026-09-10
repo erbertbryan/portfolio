@@ -1658,18 +1658,39 @@ a {
     transition: font-size 640ms var(--ease);
   }
   .case .showcase--hero {
-    transition: width 640ms var(--ease), right 640ms var(--ease);
+    transition: width 640ms var(--ease), right 640ms var(--ease),
+      bottom 640ms var(--ease), transform 640ms var(--ease);
   }
   .case.is-expanded .case__frame {
     --frame-pad-x: clamp(14px, 3vw, 40px);
-    --frame-pad-y: clamp(14px, 2vw, 26px);
+    /* cut way down from the closed card's own --frame-pad-y — this is
+       what was leaving the video short of the frame's true bottom
+       edge (see .showcase--hero below) instead of it actually being
+       too small for the space */
+    --frame-pad-y: clamp(6px, 1vw, 14px);
     height: clamp(220px, calc((100vh - var(--stick) - 32px) / 2), 620px);
   }
   .case.is-expanded .case__title {
-    font-size: clamp(1rem, 2.2vw, 1.8rem);
+    /* the closed card's own title reads fine at full hero size; this
+       header shrinks the frame to half but the text was shrinking
+       much further than that, leaving it looking lost in the space
+       rather than reading as a smaller version of the same card */
+    font-size: clamp(1.6rem, 3.2vw, 2.6rem);
   }
   .case.is-expanded .showcase--hero {
-    width: clamp(310px, max(38vw, 54vh), 780px);
+    /* bottom-anchored instead of vertically centered — centering was
+       what clipped it during the reveal tilt (the tilted pose's
+       bounding box sits differently than the flat one, and centering
+       means either edge can end up outside the frame); pinning to the
+       bottom edge it's meant to bleed off is stable through the whole
+       animation. Sized straight off this frame's own (unchanged)
+       height formula, not the closed card's, plus a deliberate ~7%
+       so it still bleeds past the edge slightly rather than landing
+       exactly flush. */
+    top: auto;
+    bottom: calc(-1 * var(--frame-pad-y));
+    transform: none;
+    width: clamp(480px, calc((100vh - var(--stick) - 32px) * 1.0665), 1200px);
   }
 }
 .case.is-expanded .phone {
