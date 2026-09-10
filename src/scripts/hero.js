@@ -225,47 +225,63 @@ function initWheel() {
 }
 
 /* ---------------- headline scramble ----------------
-   Hovering (or focusing) the "Book a call" CTA scrambles each
-   [data-scramble] headline line into its data-hover-text — every
-   character races through random glyphs before locking to its real
-   one, left to right, like the line is resolving itself rather than
-   just changing. Leaving swaps it back the same way. */
+   Hovering (or focusing) the "Book a call" CTA scrambles the headline
+   from its default wording into the hover one. Only the words that
+   actually differ move — .hero__title is hand-split into .hero__static
+   runs (untouched, always) and .hero__scramble slots (the words that
+   change — see index.html). A slot going to "" is a plain removal, not
+   an addition, so it just clears instead of animating.
+
+   Each in-flight glyph is its own <span class="hero__glyph"> (light
+   blue, see style.css); the moment a character locks in, it's written
+   back out as plain text instead, inheriting .hero__title's own ink
+   colour immediately — the colour change has to land in the same
+   frame as the reveal, not fade in after it. */
 const SCRAMBLE_CHARS = "!<>-_\\/[]{}=+*^?#";
+
+function escapeHtml(s) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
 
 function scrambleInto(el, text, frame) {
   let out = "";
   let done = 0;
   for (let i = 0; i < text.length; i++) {
-    const reveal = frame.reveal[i];
-    if (frame.n >= reveal) {
+    if (frame.n >= frame.reveal[i] || text[i] === " ") {
+      // revealed (or a space, which never scrambles — a flickering
+      // gap reads as a glitch, not a word): plain text, instantly the
+      // title's own colour, no separate transition to wait on
       done++;
-      out += text[i];
-    } else if (text[i] === " ") {
-      done++; // spaces never scramble — a flickering gap reads as a glitch, not a word
-      out += " ";
+      out += escapeHtml(text[i]);
     } else {
-      out += SCRAMBLE_CHARS[(Math.random() * SCRAMBLE_CHARS.length) | 0];
+      const ch = SCRAMBLE_CHARS[(Math.random() * SCRAMBLE_CHARS.length) | 0];
+      out += `<span class="hero__glyph">${ch}</span>`;
     }
   }
-  el.textContent = out;
+  el.innerHTML = out;
   return done === text.length;
 }
 
 function initScramble(root) {
   const cta = root.querySelector(".hero__cta");
-  const lines = root.querySelectorAll("[data-scramble]");
-  if (!cta || !lines.length) return;
+  const slots = root.querySelectorAll(".hero__scramble");
+  if (!cta || !slots.length) return;
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-  const scramblers = [...lines].map((el) => {
-    const defaultText = el.textContent;
-    const hoverText = el.dataset.hoverText || defaultText;
+  const scramblers = [...slots].map((el) => {
+    const defaultText = el.dataset.default || "";
+    const hoverText = el.dataset.hover || "";
     let raf = null;
 
     const setText = (text) => {
       if (raf) cancelAnimationFrame(raf);
+      raf = null;
+      if (!text) {
+        el.textContent = ""; // a removal — nothing to reveal, so nothing to animate
+        return;
+      }
       // each character starts revealing at its own frame, staggered
-      // left to right, so the decode visibly sweeps across the line
+      // left to right, so the decode visibly sweeps across the word
       // instead of every character landing at once
       const frame = {
         n: 0,

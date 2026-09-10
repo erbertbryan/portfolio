@@ -27,6 +27,7 @@
   --coral-soft: #ff7a52;
   --green: #2f9e63;
   --card: #ffffff;
+  --scramble-blue: #5b9dff; /* the hero title's in-flight scramble glyphs — see .hero__glyph */
 
   --ease: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -451,6 +452,16 @@ a {
   letter-spacing: -0.015em;
   max-width: 34ch;
   color: var(--ink);
+}
+/* .hero__static never changes and is never touched by JS — only the
+   .hero__scramble slots swap text (see initScramble() in hero.js).
+   Each unrevealed glyph is its own span, coloured light blue; once a
+   character locks in it's written back out as plain text, inheriting
+   .hero__title's own ink colour immediately rather than fading to it —
+   the colour change has to land in the same frame as the reveal, not
+   drift in after. */
+.hero__glyph {
+  color: var(--scramble-blue);
 }
 
 /* scroll cue */
