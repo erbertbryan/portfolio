@@ -7,7 +7,7 @@ export const projects = [
     logoSquare: true, // an icon mark, not a wordmark — needs its own height
     name: "Financeable",
     accent: "#7C3AED",
-    tags: ["#Fintech", "#Web", "#Mobile", "#Branding", "#Marketing", "#Animations"],
+    tags: ["UX/UI", "Fintech", "Responsive", "Dashboard", "Branding", "Motion Graphics"],
     platform: "Web · Mobile",
     role: "UI/UX Lead & Brand Designer",
     blurb:
@@ -60,7 +60,7 @@ export const projects = [
     logoSquare: true, // an icon mark, not a wordmark — needs its own height
     name: "Ecommerce Redesign",
     accent: "#D42A2A",
-    tags: ["#Web", "#Mobile", "#Ecommerce"],
+    tags: ["UX/UI", "Hardware", "Responsive", "Ecommerce", "Illustration"],
     platform: "Web · Mobile",
     role: "UI/UX Designer & Illustrator",
     blurb:
@@ -105,7 +105,7 @@ export const projects = [
     logoSvg: "/brand/logos/mugna.svg",
     name: "Mugna Tech",
     accent: "#6D28D9",
-    tags: ["#Web", "#DesignSystem", "#VibeCoding", "#LandingPage", "#AIIntegrations"],
+    tags: ["UX/UI", "Software Outsourcing", "Responsive", "AI-Native Process", "Motion Graphics"],
     platform: "Web",
     role: "UI/UX Designer",
     blurb:
@@ -171,7 +171,7 @@ export const projects = [
     logoSquare: true, // now an icon mark alone, not an icon+wordmark lockup
     name: "Specialty Coffee",
     accent: "#7B4B2A",
-    tags: ["#Ecommerce", "#Web", "#Coffee", "#DesignSystem", "#Branding"],
+    tags: ["UX/UI", "Coffee", "Responsive", "Ecommerce", "Illustration", "Branding"],
     platform: "Web",
     role: "UI/UX Designer",
     blurb:
@@ -216,14 +216,7 @@ export const projects = [
     // collides on the double H at display size
     name: "Smash Hub",
     accent: "#B6E036", // sampled from the product's own lime CTA
-    tags: [
-      "#Pickleball",
-      "#WebApp",
-      "#SaaS",
-      "#UIUX",
-      "#BookingSystem",
-      "#Dashboard",
-    ],
+    tags: ["UX/UI", "Pickleball", "Responsive", "Booking", "Dashboard", "Motion Graphics"],
     platform: "Web",
     role: "UI/UX Designer & Product Strategist",
     blurb:

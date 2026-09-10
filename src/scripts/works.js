@@ -65,6 +65,22 @@ export function showcase(p, { big } = {}) {
   </div>`;
 }
 
+/* three tags per row, packed tightly rather than lined up into shared
+   columns — a grid with one shared column width per position made
+   short and long tags in the same column leave wildly different gaps
+   after them. Chunking into its own row per 3 sidesteps that: each
+   row is an independent flex line, sized only by what's actually in
+   it. */
+function tagsMarkup(tags) {
+  const rows = [];
+  for (let i = 0; i < tags.length; i += 3) rows.push(tags.slice(i, i + 3));
+  return rows
+    .map(
+      (row) =>
+        `<div class="case__tags-row">${row.map((t) => `<span>${t}</span>`).join("")}</div>`
+    )
+    .join("");
+}
 
 export function initWorks() {
   const root = document.querySelector("[data-works]");
@@ -99,7 +115,7 @@ export function initWorks() {
                 : `<span class="case__logo">${p.logo}</span>`
             }
             <h3 class="case__title">${p.name}</h3>
-            <div class="case__tags">${p.tags.map((t) => `<span>${t}</span>`).join("")}</div>
+            <div class="case__tags">${tagsMarkup(p.tags)}</div>
             <button class="case__cta" type="button" data-clickable>
               <span class="case__cta-label">View project</span>
               <i>${arrow}</i>

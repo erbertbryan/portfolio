@@ -1273,18 +1273,37 @@ a {
    of one box stretching the width of the longest line */
 /* three per row, always — a plain wrap let the count per line drift
    with tag length from one project to the next */
+/* three per row (see tagsMarkup() in works.js), each row its own flex
+   line rather than a shared grid — nothing here lines tag N in one row
+   up with tag N in the next, so a short tag next to a long one just
+   sits at its own natural width instead of stretching to match a
+   column. */
 .case__tags {
-  display: grid;
-  grid-template-columns: repeat(3, max-content);
-  gap: 10px 16px;
-  justify-content: start;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   margin-top: clamp(14px, 1.6vw, 22px);
 }
+.case__tags-row {
+  display: flex;
+  gap: 16px;
+}
 .case__tags span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   font-family: "SK Modernist", var(--font-body), sans-serif;
   font-size: 0.95rem;
   letter-spacing: 0.04em;
   color: var(--ink-mute);
+}
+.case__tags span::before {
+  content: "";
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: 0 0 auto;
 }
 .case__cta {
   display: inline-flex;
@@ -2239,9 +2258,17 @@ a {
       calc(-1 * var(--frame-pad-y));
     transform: none;
   }
-  /* three fixed columns is too wide to fit a phone — back to wrapping */
+  /* three per row is too wide for some of these tags to fit a phone —
+     dissolve the row grouping (display:contents drops the wrapper
+     from layout entirely, leaving its <span> children as direct
+     flex-wrap items of .case__tags below) and just wrap freely,
+     centred like the rest of the mobile card */
+  .case__tags-row {
+    display: contents;
+  }
   .case__tags {
     display: flex;
+    flex-direction: row; /* the base rule's column stays in effect otherwise — this is what actually re-enables horizontal wrapping */
     flex-wrap: wrap;
     justify-content: center;
   }
