@@ -170,6 +170,10 @@ export const projects = [
     logoSvg: "/brand/logos/coffee.svg",
     logoSquare: true, // now an icon mark alone, not an icon+wordmark lockup
     name: "Specialty Coffee",
+    // .case__title only — name stays the plain one-line version for
+    // aria-labels and the "keep exploring" row title, which shouldn't
+    // carry a hard-coded <br>
+    titleLines: ["Specialty", "Coffee"],
     accent: "#7B4B2A",
     tags: ["UX/UI", "Coffee", "Responsive", "Ecommerce", "Illustration", "Branding"],
     platform: "Web",

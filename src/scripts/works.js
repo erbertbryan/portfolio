@@ -114,7 +114,7 @@ export function initWorks() {
                   } />`
                 : `<span class="case__logo">${p.logo}</span>`
             }
-            <h3 class="case__title">${p.name}</h3>
+            <h3 class="case__title">${p.titleLines ? p.titleLines.join("<br>") : p.name}</h3>
             <div class="case__tags">${tagsMarkup(p.tags)}</div>
             <button class="case__cta" type="button" data-clickable>
               <span class="case__cta-label">View project</span>

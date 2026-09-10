@@ -1728,15 +1728,19 @@ a {
        what clipped it during the reveal tilt (the tilted pose's
        bounding box sits differently than the flat one, and centering
        means either edge can end up outside the frame); pinning to the
-       bottom edge it's meant to bleed off is stable through the whole
-       animation. Sized straight off this frame's own (unchanged)
-       height formula, not the closed card's, plus a deliberate ~7%
-       so it still bleeds past the edge slightly rather than landing
-       exactly flush. */
+       bottom edge is stable through the whole animation. Docked flush
+       to the frame's true bottom (not bled past it) — this header is
+       meant to show the whole mockup, top to bottom, not crop either
+       edge the way the closed card's video is allowed to. */
     top: auto;
-    bottom: calc(-1 * var(--frame-pad-y));
+    bottom: 0;
     transform: none;
-    width: clamp(480px, calc((100vh - var(--stick) - 32px) * 1.0665), 1200px);
+    /* --hero-scale (see .showcase--hero__card) scales the card up
+       ~15% from a bottom-centre origin, so its rendered top sits well
+       above this box's own top edge — sized so that even after that
+       expansion, the top still lands inside the frame instead of
+       getting clipped by its overflow: hidden. */
+    width: clamp(380px, calc((100vh - var(--stick) - 32px) * 0.83), 960px);
   }
 }
 .case.is-expanded .phone {
@@ -2281,7 +2285,13 @@ a {
     height: auto;
     right: auto;
     top: auto;
-    margin: clamp(24px, 5vw, 40px) calc(-1 * var(--frame-pad-x))
+    /* the top margin has to clear more than the card's own box: the
+       --hero-scale boost (see .showcase--hero__card) scales the card
+       up from a bottom-centre origin, so its rendered top edge sits
+       well above this container's own box — margin-top on the
+       container doesn't know that, so a value sized to the box alone
+       still let the scaled-up render overlap the CTA above it. */
+    margin: clamp(64px, 14vw, 96px) calc(-1 * var(--frame-pad-x))
       calc(-1 * var(--frame-pad-y));
     transform: none;
   }
