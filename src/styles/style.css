@@ -1619,6 +1619,13 @@ a {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   background: var(--paper);
+  /* the base rule's will-change: transform (for the closed-card stack
+     effect, paused while expanded anyway) makes this element the
+     containing block for any position: fixed descendant — including
+     .case__back-wrap, which needs to stay pinned to the true viewport
+     as the story scrolls, not to this box's own scroll position.
+     Canceling it here is what makes "fixed" actually mean fixed. */
+  will-change: auto;
 }
 /* the header itself is NOT pinned — it scrolls away with the rest of
    the page, only .case__back-wrap above stays put. */
