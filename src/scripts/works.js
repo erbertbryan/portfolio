@@ -42,8 +42,6 @@ export function showcase(p, { big } = {}) {
         <video
           src="${p.heroVideo.src}"
           poster="${p.heroVideo.poster}"
-          width="1800"
-          height="886"
           muted
           playsinline
           preload="metadata"
