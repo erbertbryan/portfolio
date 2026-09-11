@@ -241,6 +241,13 @@ export function initFolders() {
     const strip = buildStrip(folder);
     card.appendChild(strip);
 
+    if (folder.quote) {
+      const quote = document.createElement("p");
+      quote.className = "folder__quote";
+      quote.textContent = folder.quote;
+      card.appendChild(quote);
+    }
+
     return {
       folder,
       card,
