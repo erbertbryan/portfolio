@@ -47,6 +47,88 @@ const ABSORBED = [
   { t: "Front-end build", d: "The prototype is real code, so there's nothing to rebuild." },
 ];
 
+/* ---------------- headline scramble ----------------
+   Switching to AI-Native reveals ", supercharged." in the section title
+   through the same glyph-flicker decode as the hero CTA (see
+   scrambleInto() in hero.js — duplicated here in miniature rather than
+   shared, since the hero's version is wired tightly to its own hover
+   events). Switching back to Traditional just clears the slots, same
+   as the hero's own "removal" case — a plain default doesn't need a
+   reverse animation. */
+const SCRAMBLE_CHARS = "!<>-_\\/[]{}=+*^?#";
+const GLYPH_HOLD_MS = 55;
+const REVEAL_BASE_MS = 260;
+const REVEAL_STAGGER_MS = 80;
+const REVEAL_JITTER_MS = 80;
+
+function escapeHtml(s) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function scrambleInto(el, text, elapsed, state) {
+  let out = "";
+  let done = 0;
+  for (let i = 0; i < text.length; i++) {
+    if (elapsed >= state.reveal[i] || text[i] === " ") {
+      done++;
+      out += escapeHtml(text[i]);
+    } else {
+      if (state.glyphs[i] === undefined || elapsed - state.rolledAt[i] >= GLYPH_HOLD_MS) {
+        state.glyphs[i] = SCRAMBLE_CHARS[(Math.random() * SCRAMBLE_CHARS.length) | 0];
+        state.rolledAt[i] = elapsed;
+      }
+      out += `<span class="hero__glyph">${state.glyphs[i]}</span>`;
+    }
+  }
+  el.innerHTML = out;
+  return done === text.length;
+}
+
+// returns a setter that swaps every [data-proc-title] .proc__scramble slot
+// to its "on" (AI) or "off" (traditional) text
+function initTitleScramble(reduce) {
+  // [data-proc-title] sits in .section-head, a sibling of .proc (data-proc)
+  // rather than a descendant, so this is scoped from the document
+  const slots = [...document.querySelectorAll("[data-proc-title] .proc__scramble")];
+  if (!slots.length) return () => {};
+
+  const scramblers = slots.map((el) => {
+    const offText = el.dataset.off || "";
+    const onText = el.dataset.on || "";
+    let raf = null;
+
+    const setText = (text) => {
+      if (raf) cancelAnimationFrame(raf);
+      raf = null;
+      if (reduce || !text) {
+        el.textContent = text;
+        return;
+      }
+      const state = {
+        glyphs: [],
+        rolledAt: [],
+        reveal: Array.from(
+          text,
+          (_, i) => REVEAL_BASE_MS + i * REVEAL_STAGGER_MS + Math.random() * REVEAL_JITTER_MS
+        ),
+      };
+      const start = performance.now();
+      const tick = (now) => {
+        const finished = scrambleInto(el, text, now - start, state);
+        if (!finished) raf = requestAnimationFrame(tick);
+        else raf = null;
+      };
+      raf = requestAnimationFrame(tick);
+    };
+
+    return { offText, onText, setText };
+  });
+
+  return (mode) => {
+    scramblers.forEach((s) => s.setText(mode === "ai" ? s.onText : s.offText));
+  };
+}
+
 export function initProcessTabs() {
   const proc = document.querySelector("[data-proc]");
   if (!proc) return;
@@ -128,6 +210,8 @@ export function initProcessTabs() {
     thumb.style.transform = `translateX(${active.offsetLeft - 5}px)`;
   };
 
+  const setTitleMode = initTitleScramble(reduce);
+
   const setMode = (next) => {
     if (next === mode) return;
     mode = next;
@@ -140,6 +224,7 @@ export function initProcessTabs() {
     moveThumb();
     hidePop();
     applyMode();
+    setTitleMode(mode);
 
     if (!reduce && mode === "ai") {
       flow.classList.remove("is-super");
