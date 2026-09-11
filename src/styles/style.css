@@ -19,7 +19,11 @@
   --paper-2: #ededec;
   --ink: #161512;
   --ink-soft: #55524c;
-  --ink-mute: #9b9793;
+  /* darkened from the original #9b9793 — that only cleared ~2.7:1 against
+     --paper, well under WCAG AA's 4.5:1 for the body-size labels/captions
+     it's used on; this clears ~4.9:1 while staying visibly the mutest of
+     the three ink tones */
+  --ink-mute: #6f6b64;
   --line: #e7e6e3;
   --yellow: #f5c518;
   --yellow-deep: #e0a800;

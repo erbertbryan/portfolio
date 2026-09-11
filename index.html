@@ -6,12 +6,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Erbert Bryan — UX/UI designer based in the Philippines, designing and shipping digital products for teams worldwide." />
     <title>Erbert Bryan — UX/UI Designer</title>
+    <!-- Landing on a hash URL (e.g. /#process), the browser jumps to that
+         section the instant it exists in the still-parsing document — long
+         before main.js has built the work cards, tool tiles, and process
+         chips that sit above it. Everything then grows underneath that
+         already-scrolled viewport, which reads as one huge layout shift.
+         Stashing the hash and restoring it ourselves once boot() has
+         finished (see main.js) makes the browser skip its own premature
+         jump and land in the right place the first time. -->
+    <script>
+      if (location.hash) {
+        if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+        window.__pendingHash = location.hash;
+        history.replaceState(null, "", location.pathname + location.search);
+      }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- loaded async (preload -> swap to stylesheet on arrival) so this
+         request doesn't block first paint; each face still resolves via
+         its own font-display: swap once the sheet lands -->
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,400..600&family=Space+Mono:wght@400;700&display=swap"
+    />
     <link
       href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,400..600&family=Space+Mono:wght@400;700&display=swap"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
     />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,400..600&family=Space+Mono:wght@400;700&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
   </head>
   <body>
     <!-- grain overlay -->
@@ -160,9 +191,12 @@
            fans them out, clicking again stacks them back — see tools.js -->
       <section class="stack">
         <p class="stack__label" data-reveal>Powered by these tools</p>
-        <ul class="stack__list is-stacked" data-tools data-reveal
+        <!-- a div, not a ul: role="button" below already overrides any list
+             semantics, so real <li> children would be orphaned list items
+             with no accessible list parent -->
+        <div class="stack__list is-stacked" data-tools data-reveal
             role="button" tabindex="0" aria-expanded="false"
-            aria-label="Expand the tech stack"></ul>
+            aria-label="Expand the tech stack"></div>
       </section>
 
       <!-- ===================== PROCESS ===================== -->
@@ -290,18 +324,37 @@
     <script type="module" src="/src/scripts/main.js"></script>
 
     <!-- Cal.com element-click embed: binds to [data-cal-link] elements
-         (the hero "Book a call" CTA) and opens the booking modal -->
+         (the hero "Book a call" CTA + nav calendar button) and opens the
+         booking modal. This IIFE only defines window.Cal as a queue stub —
+         cheap, no network request. The actual embed.js download (a full
+         booking app, hundreds of KB) is deferred to initCalOnce() below,
+         which fires on the first real signal someone means to book,
+         instead of unconditionally on every page load. -->
     <script type="text/javascript">
       (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if (typeof namespace === "string") { cal.ns[namespace] = cal.ns[namespace] || api; p(cal.ns[namespace], ar); p(cal, ["initNamespace", namespace]); } else p(cal, ar); return; } p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
-      Cal("init", "15min", { origin: "https://app.cal.com" });
-      Cal.config = Cal.config || {};
-      Cal.config.forwardQueryParams = true;
 
-      Cal.ns["15min"]("ui", {
-        cssVarsPerTheme: { light: { "cal-brand": "#000000" }, dark: { "cal-brand": "#ff9b00" } },
-        hideEventTypeDetails: false,
-        layout: "month_view",
+      function initCalOnce() {
+        if (window.__calInited) return;
+        window.__calInited = true;
+        Cal("init", "15min", { origin: "https://app.cal.com" });
+        Cal.config = Cal.config || {};
+        Cal.config.forwardQueryParams = true;
+        Cal.ns["15min"]("ui", {
+          cssVarsPerTheme: { light: { "cal-brand": "#000000" }, dark: { "cal-brand": "#ff9b00" } },
+          hideEventTypeDetails: false,
+          layout: "month_view",
+        });
+      }
+      // pointerenter/focus land before a mouse or keyboard click; touchstart
+      // lands before a tap — all fire in time to have the modal ready.
+      document.querySelectorAll("[data-cal-link]").forEach((el) => {
+        el.addEventListener("pointerenter", initCalOnce, { once: true });
+        el.addEventListener("focus", initCalOnce, { once: true });
+        el.addEventListener("touchstart", initCalOnce, { once: true, passive: true });
       });
+      // safety net for anyone who lands on a trigger without one of the
+      // events above (e.g. assistive tech that activates without focus)
+      setTimeout(initCalOnce, 8000);
     </script>
   </body>
 </html>

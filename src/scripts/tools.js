@@ -31,7 +31,7 @@ export function initTools() {
   const mid = (TOOLS.length - 1) / 2;
 
   TOOLS.forEach((t, i) => {
-    const li = document.createElement("li");
+    const li = document.createElement("div");
     li.className = "tool";
     // --i drives the piled-up transform: offset from the middle card, so the
     // deck fans symmetrically. --z keeps the centre card on top.

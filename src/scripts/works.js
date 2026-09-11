@@ -42,6 +42,8 @@ export function showcase(p, { big } = {}) {
         <video
           src="${p.heroVideo.src}"
           poster="${p.heroVideo.poster}"
+          width="1800"
+          height="886"
           muted
           playsinline
           preload="metadata"
@@ -114,7 +116,7 @@ export function initWorks() {
                   } />`
                 : `<span class="case__logo">${p.logo}</span>`
             }
-            <h3 class="case__title">${p.titleLines ? p.titleLines.join("<br>") : p.name}</h3>
+            <h2 class="case__title">${p.titleLines ? p.titleLines.join("<br>") : p.name}</h2>
             <div class="case__tags">${tagsMarkup(p.tags)}</div>
             <button class="case__cta" type="button" data-clickable>
               <span class="case__cta-label">View project</span>

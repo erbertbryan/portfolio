@@ -1,22 +1,37 @@
-import { Rive, Layout, Fit, Alignment } from "@rive-app/canvas";
-
-/* ---------------- Rive avatar ---------------- */
+/* ---------------- Rive avatar ----------------
+   The Rive runtime (WASM + its JS glue) is heavy for one decorative loop
+   buried in the About section — dynamically imported only once the canvas
+   is about to scroll into view, instead of on every page load. */
 function initAvatar() {
   const canvas = document.querySelector("[data-rive]");
   if (!canvas) return;
-  try {
-    const r = new Rive({
-      src: "/yanyan_avatar2.riv",
-      canvas,
-      autoplay: true,
-      stateMachines: "State Machine 1",
-      layout: new Layout({ fit: Fit.Cover, alignment: Alignment.Center }),
-      onLoad: () => r.resizeDrawingSurfaceToCanvas(),
-    });
-    window.addEventListener("resize", () => r.resizeDrawingSurfaceToCanvas());
-  } catch (e) {
-    console.warn("Rive avatar failed to load:", e);
-  }
+
+  const load = async () => {
+    const { Rive, Layout, Fit, Alignment } = await import("@rive-app/canvas");
+    try {
+      const r = new Rive({
+        src: "/yanyan_avatar2.riv",
+        canvas,
+        autoplay: true,
+        stateMachine: "State Machine 1",
+        layout: new Layout({ fit: Fit.Cover, alignment: Alignment.Center }),
+        onLoad: () => r.resizeDrawingSurfaceToCanvas(),
+      });
+      window.addEventListener("resize", () => r.resizeDrawingSurfaceToCanvas());
+    } catch (e) {
+      console.warn("Rive avatar failed to load:", e);
+    }
+  };
+
+  const io = new IntersectionObserver(
+    (entries, obs) => {
+      if (!entries[0].isIntersecting) return;
+      obs.disconnect();
+      load();
+    },
+    { rootMargin: "600px 0px" }
+  );
+  io.observe(canvas);
 }
 
 /* ---------------- 3D screen wheel ----------------
