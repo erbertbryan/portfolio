@@ -239,7 +239,7 @@ export const projects = [
           "/carousel/smash-section3-2.webp",
           "/carousel/smash-section3-3.webp",
         ],
-        text: "I designed a modern court booking web app that simplifies scheduling into a direct, low-friction flow. To bridge the gap between court operations and business growth, we coupled the intuitive front-end player experience with an enterprise back-office system, featuring account management, multi-court allocation, automated local payment gateways, and real-time business performance analytics.",
+        text: "I designed a modern court booking web app that simplifies scheduling into a direct, low-friction flow. As \"vibe-coded\" pickleball sites flooded the local market, many suffered from bad UX disguised as fast builds—garbage inputs leading to broken user journeys. SmashHub needed to stand out from day one, using a polished front-end booking flow to reduce customer acquisition friction while giving owners an enterprise dashboard for court allocation, payments, and real-time business analytics.",
       },
       {
         type: "stats",
