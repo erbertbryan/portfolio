@@ -56,10 +56,10 @@ const ABSORBED = [
    as the hero's own "removal" case — a plain default doesn't need a
    reverse animation. */
 const SCRAMBLE_CHARS = "!<>-_\\/[]{}=+*^?#";
-const GLYPH_HOLD_MS = 55;
-const REVEAL_BASE_MS = 260;
-const REVEAL_STAGGER_MS = 80;
-const REVEAL_JITTER_MS = 80;
+const GLYPH_HOLD_MS = 45;
+const REVEAL_BASE_MS = 180;
+const REVEAL_STAGGER_MS = 55;
+const REVEAL_JITTER_MS = 55;
 
 function escapeHtml(s) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

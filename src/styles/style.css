@@ -775,6 +775,13 @@ a {
   background-clip: text;
   color: transparent;
 }
+/* forces "supercharged." onto its own row the moment it reveals, rather
+   than wrapping there only once the line runs out of room — empty (the
+   Traditional state) it has no content and so no height, collapsing
+   away cleanly instead of leaving a blank second line */
+.process .section-title .proc__super-row {
+  display: block;
+}
 
 .proc {
   position: relative;
