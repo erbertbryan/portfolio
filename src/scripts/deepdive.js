@@ -204,19 +204,27 @@ function storyBodyMarkup(project) {
         // usual alternation — e.g. one whose lead media renders its own
         // white canvas, where any tint would show as a seam around it
         const white = s.onWhite ? " story__section--white" : "";
-        // a true masonry pack (CSS multi-column) instead of a locked grid —
-        // for a mix of differently-shaped media (e.g. taller video frames
-        // next to wider screenshots) where equal-height rows would leave
-        // dead space under whichever tile in the pair is shorter
+        // a true masonry pack instead of a locked grid — for a mix of
+        // differently-shaped media (e.g. taller video frames next to wider
+        // screenshots) where equal-height rows would leave dead space under
+        // whichever tile in the pair is shorter. Two independent columns,
+        // each stacking its own items back to back regardless of the other
+        // column's height at that point — items alternate left/right by
+        // index (1st, 3rd, 5th... left; 2nd, 4th, 6th... right) so they
+        // still read as ordinary left/right row pairs (1&2, 3&4, 5&6...),
+        // just without a shared row height forcing them to align.
         if (s.masonry) {
-          const cards = s.images
-            .map((item) => `<div class="story__bento-card">${mediaTag(item)}</div>`)
-            .join("");
+          const left = s.images.filter((_, i) => i % 2 === 0);
+          const right = s.images.filter((_, i) => i % 2 === 1);
+          const col = (items) =>
+            `<div class="story__bento-col">${items
+              .map((item) => `<div class="story__bento-card">${mediaTag(item)}</div>`)
+              .join("")}</div>`;
           return `
           <section class="story__section story__bento${alt}${white}" data-story-in>
             ${leadHtml}
             <p class="story__paragraph story__paragraph--center">${s.text}</p>
-            <div class="story__bento-grid story__bento-grid--masonry">${cards}</div>
+            <div class="story__bento-grid story__bento-grid--masonry">${col(left)}${col(right)}</div>
           </section>`;
         }
         // Counts that don't divide evenly into a 2-up grid get explicit row
