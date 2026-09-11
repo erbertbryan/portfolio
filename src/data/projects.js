@@ -151,8 +151,8 @@ export const projects = [
         // masonry-packed rather than locked into equal-height rows — the
         // videos' own aspect ratio runs taller than the screenshots', so a
         // regular grid would leave dead space under whichever tile in each
-        // pair is shorter. Still alternates image/video reading down each
-        // column, in the order below.
+        // pair is shorter. Order matches Bryan's numbered files in
+        // carousel/mugna/new (1.png .. 8.mp4).
         masonry: true,
         images: [
           "/carousel/mugna-section5-1.webp",
@@ -167,18 +167,18 @@ export const projects = [
             poster: "/carousel/mugna-section5-3-poster.webp",
           },
           "/carousel/mugna-section5-4.webp",
-          "/carousel/mugna-section5-5.webp",
           {
             type: "video",
-            src: "/carousel/mugna-section5-6.mp4",
-            poster: "/carousel/mugna-section5-6-poster.webp",
+            src: "/carousel/mugna-section5-5.mp4",
+            poster: "/carousel/mugna-section5-5-poster.webp",
           },
+          "/carousel/mugna-section5-6.webp",
+          "/carousel/mugna-section5-7.webp",
           {
             type: "video",
-            src: "/carousel/mugna-section5-7.mp4",
-            poster: "/carousel/mugna-section5-7-poster.webp",
+            src: "/carousel/mugna-section5-8.mp4",
+            poster: "/carousel/mugna-section5-8-poster.webp",
           },
-          "/carousel/mugna-section5-8.webp",
         ],
       },
     ],
