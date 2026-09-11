@@ -498,7 +498,119 @@ function initScrubVideos(root) {
   });
 }
 
+/* ---------------- mobile media lightbox ----------------
+   Tapping a story image or video opens it full-screen with a close
+   button and prev/next + a page count below — mobile only (desktop's
+   grid stays exactly as it is, nothing to open). Two things never
+   qualify: the deep-dive header video (a different section entirely,
+   not part of the story body) and the bento "lead" media (its own
+   scroll-scrubbed choreography, not a static frame to page through).
+   Every other video plays here exactly as it does inline — autoplay,
+   muted, looped, no native controls — so it reads as a bigger version
+   of the same ambient demo, not a separate video player. */
+const LIGHTBOX_SELECTOR =
+  ".story__media-card img, .story__media-card video, .story__bento-card img, .story__bento-card video";
+const LIGHTBOX_CLOSE = '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+const LIGHTBOX_PREV = '<svg viewBox="0 0 24 24"><path d="M19 12H6M11 6l-6 6 6 6"/></svg>';
+const LIGHTBOX_NEXT = ARROW_FWD;
+
+function mediaFromEl(el) {
+  return el.tagName === "VIDEO"
+    ? { type: "video", src: el.getAttribute("src"), poster: el.getAttribute("poster") || "" }
+    : { type: "image", src: el.getAttribute("src"), alt: el.getAttribute("alt") || "" };
+}
+
+function initLightbox() {
+  let box = null;
+  let stage = null;
+  let count = null;
+  let items = [];
+  let index = 0;
+
+  const isMobile = () => window.matchMedia("(max-width: 1024px)").matches;
+
+  const render = () => {
+    const item = items[index];
+    if (!item || !stage) return;
+    stage.innerHTML =
+      item.type === "video"
+        ? `<video src="${item.src}"${
+            item.poster ? ` poster="${item.poster}"` : ""
+          } autoplay muted loop playsinline></video>`
+        : `<img src="${item.src}" alt="${item.alt}" />`;
+    count.textContent = `${index + 1} / ${items.length}`;
+  };
+
+  const step = (dir) => {
+    if (!items.length) return;
+    index = (index + dir + items.length) % items.length;
+    render();
+  };
+
+  const close = () => {
+    if (!box) return;
+    box.classList.remove("is-open");
+    box.setAttribute("aria-hidden", "true");
+    stage.innerHTML = ""; // stop playback rather than leave it running offscreen
+  };
+
+  const open = (gallery, startIndex) => {
+    if (!box) {
+      box = document.createElement("div");
+      box.className = "lightbox";
+      box.setAttribute("aria-hidden", "true");
+      box.innerHTML = `
+        <button type="button" class="lightbox__close" aria-label="Close">${LIGHTBOX_CLOSE}</button>
+        <div class="lightbox__stage"></div>
+        <div class="lightbox__bar">
+          <button type="button" class="lightbox__nav" data-dir="-1" aria-label="Previous">${LIGHTBOX_PREV}</button>
+          <span class="lightbox__count"></span>
+          <button type="button" class="lightbox__nav" data-dir="1" aria-label="Next">${LIGHTBOX_NEXT}</button>
+        </div>`;
+      document.body.appendChild(box);
+      stage = box.querySelector(".lightbox__stage");
+      count = box.querySelector(".lightbox__count");
+      box.querySelector(".lightbox__close").addEventListener("click", close);
+      box.querySelectorAll(".lightbox__nav").forEach((btn) => {
+        btn.addEventListener("click", () => step(Number(btn.dataset.dir)));
+      });
+      // taps on the backdrop itself (not the stage or bar) close it too
+      box.addEventListener("click", (e) => {
+        if (e.target === box) close();
+      });
+    }
+    items = gallery;
+    index = startIndex;
+    render();
+    box.classList.add("is-open");
+    box.setAttribute("aria-hidden", "false");
+  };
+
+  document.addEventListener("click", (e) => {
+    if (!isMobile()) return;
+    const el = e.target.closest(LIGHTBOX_SELECTOR);
+    if (!el || el.hasAttribute("data-scrub")) return;
+    const story = el.closest("[data-story]");
+    if (!story) return;
+    const all = [...story.querySelectorAll(LIGHTBOX_SELECTOR)].filter(
+      (m) => !m.hasAttribute("data-scrub")
+    );
+    const startIndex = all.indexOf(el);
+    if (startIndex === -1) return;
+    open(all.map(mediaFromEl), startIndex);
+  });
+
+  window.addEventListener("keydown", (e) => {
+    if (!box || !box.classList.contains("is-open")) return;
+    if (e.key === "Escape") close();
+    else if (e.key === "ArrowLeft") step(-1);
+    else if (e.key === "ArrowRight") step(1);
+  });
+}
+
 export function initDeepDive(root, cards, stack) {
+  initLightbox();
+
   const byId = new Map(cards.map((c) => [c.project.id, c]));
   let current = null;
   let animating = false;

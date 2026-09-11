@@ -15,7 +15,10 @@
          finished (see main.js) makes the browser skip its own premature
          jump and land in the right place the first time. -->
     <script>
-      if (location.hash) {
+      // #case-<id> deep-links are handled synchronously by deepdive.js
+      // itself (it opens straight into that project, no scrolling
+      // involved) — only intercept plain section anchors here.
+      if (location.hash && !/^#case-/.test(location.hash)) {
         if ("scrollRestoration" in history) history.scrollRestoration = "manual";
         window.__pendingHash = location.hash;
         history.replaceState(null, "", location.pathname + location.search);
