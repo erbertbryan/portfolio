@@ -148,17 +148,33 @@ export const projects = [
       {
         type: "bento",
         text: "Using AI tools as a dynamic bridge between the designer's vision and engineering, we translated Figma tokens into clean code, delivering a modern, high-converting landing page.",
+        // 2x4 grid, alternating image/video per row so no two of the same
+        // media type ever sit side by side
         images: [
-          {
-            type: "video",
-            src: "/carousel/mugna-section5-1.mp4",
-            poster: "/carousel/mugna-section5-1-poster.webp",
-          },
+          "/carousel/mugna-section5-1.webp",
           {
             type: "video",
             src: "/carousel/mugna-section5-2.mp4",
             poster: "/carousel/mugna-section5-2-poster.webp",
           },
+          {
+            type: "video",
+            src: "/carousel/mugna-section5-3.mp4",
+            poster: "/carousel/mugna-section5-3-poster.webp",
+          },
+          "/carousel/mugna-section5-4.webp",
+          "/carousel/mugna-section5-5.webp",
+          {
+            type: "video",
+            src: "/carousel/mugna-section5-6.mp4",
+            poster: "/carousel/mugna-section5-6-poster.webp",
+          },
+          {
+            type: "video",
+            src: "/carousel/mugna-section5-7.mp4",
+            poster: "/carousel/mugna-section5-7-poster.webp",
+          },
+          "/carousel/mugna-section5-8.webp",
         ],
       },
     ],
