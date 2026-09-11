@@ -3349,9 +3349,9 @@ body.no-scroll {
      strip's share left too little clearance for the rotated photos'
      drop shadow, clipped by the strip's overflow: hidden */
   .folder.is-open:has(.folder__quote) {
-    height: calc(42vh + 140px);
-    min-height: 400px;
-    max-height: 560px;
+    height: calc(42vh + 100px);
+    min-height: 360px;
+    max-height: 480px;
   }
   .folder__quote-break {
     display: block;
