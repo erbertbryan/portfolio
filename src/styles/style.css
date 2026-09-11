@@ -2828,6 +2828,15 @@ a {
   height: 50vh;
   min-height: 320px;
   max-height: 580px;
+}
+/* the quote line eats into this fixed-height window's budget same as
+   everything else in it — without extra room here, the filmstrip (the
+   only flexible child) shrinks to fit and its cards' drop shadows run
+   out of clearance against the strip's own overflow: hidden */
+.folder.is-open:has(.folder__quote) {
+  height: calc(50vh + 74px);
+  min-height: 394px;
+  max-height: 654px;
   z-index: 5;
   padding: 0;
   border: 1px solid var(--ink);
@@ -2929,7 +2938,7 @@ a {
   display: none;
   flex: 0 0 auto;
   margin: 0;
-  padding: clamp(18px, 3vw, 30px) clamp(20px, 4vw, 40px);
+  padding: 4px clamp(20px, 4vw, 40px) clamp(16px, 3vw, 26px);
   text-align: center;
   background-image: radial-gradient(var(--line) 1px, transparent 1px);
   background-size: 26px 26px;
