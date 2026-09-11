@@ -2252,6 +2252,21 @@ a {
 .story__bento-row {
   align-items: start;
 }
+/* true masonry via CSS multi-column: items pack in DOM order, column-fill
+   balances how many land in each column by their real rendered height —
+   unlike the grid variant above, nothing here is locked to a shared row
+   height, so a tall tile never leaves dead space beside a short one. gap
+   only affects the space *between* columns in this layout; the vertical
+   gap between stacked tiles comes from each card's own margin-bottom. */
+.story__bento-grid--masonry {
+  display: block;
+  column-count: 2;
+  column-gap: clamp(14px, 2vw, 22px);
+}
+.story__bento-grid--masonry .story__bento-card {
+  break-inside: avoid;
+  margin-bottom: clamp(14px, 2vw, 22px);
+}
 .story__bento-row .story__bento-card {
   flex: 1 1 0;
   min-width: 0;
@@ -2290,6 +2305,9 @@ a {
   .story__media--bento,
   .story__media--trio {
     grid-template-columns: 1fr;
+  }
+  .story__bento-grid--masonry {
+    column-count: 1;
   }
   .story__bento-img--1,
   .story__bento-span-2,

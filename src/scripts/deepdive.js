@@ -204,6 +204,21 @@ function storyBodyMarkup(project) {
         // usual alternation — e.g. one whose lead media renders its own
         // white canvas, where any tint would show as a seam around it
         const white = s.onWhite ? " story__section--white" : "";
+        // a true masonry pack (CSS multi-column) instead of a locked grid —
+        // for a mix of differently-shaped media (e.g. taller video frames
+        // next to wider screenshots) where equal-height rows would leave
+        // dead space under whichever tile in the pair is shorter
+        if (s.masonry) {
+          const cards = s.images
+            .map((item) => `<div class="story__bento-card">${mediaTag(item)}</div>`)
+            .join("");
+          return `
+          <section class="story__section story__bento${alt}${white}" data-story-in>
+            ${leadHtml}
+            <p class="story__paragraph story__paragraph--center">${s.text}</p>
+            <div class="story__bento-grid story__bento-grid--masonry">${cards}</div>
+          </section>`;
+        }
         // Counts that don't divide evenly into a 2-up grid get explicit row
         // sizes instead, so no tile is ever left alone on the last row.
         // Every tile in a row is equal width, which (since these source

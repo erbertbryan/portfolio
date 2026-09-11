@@ -148,8 +148,12 @@ export const projects = [
       {
         type: "bento",
         text: "Using AI tools as a dynamic bridge between the designer's vision and engineering, we translated Figma tokens into clean code, delivering a modern, high-converting landing page.",
-        // 2x4 grid, alternating image/video per row so no two of the same
-        // media type ever sit side by side
+        // masonry-packed rather than locked into equal-height rows — the
+        // videos' own aspect ratio runs taller than the screenshots', so a
+        // regular grid would leave dead space under whichever tile in each
+        // pair is shorter. Still alternates image/video reading down each
+        // column, in the order below.
+        masonry: true,
         images: [
           "/carousel/mugna-section5-1.webp",
           {
