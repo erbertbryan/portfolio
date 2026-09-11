@@ -745,11 +745,10 @@ a {
    ============================================================ */
 .process {
   position: relative;
-  margin: 0 var(--edge);
   padding: clamp(80px, 12vw, 160px) 0;
   background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 24px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
   color: var(--ink);
 }
 .process .section-head {
@@ -1938,13 +1937,17 @@ a {
 }
 
 .story__meta {
+  margin-top: clamp(40px, 6vw, 64px);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: var(--card);
+}
+.story__meta-inner {
   display: grid;
   grid-template-columns: 0.7fr 0.9fr 1.6fr;
   max-width: var(--maxw);
-  margin: clamp(40px, 6vw, 64px) auto 0;
+  margin: 0 auto;
   padding: 0 var(--edge);
-  border: 1px solid var(--line);
-  background: var(--paper);
 }
 .story__meta-item {
   padding: clamp(20px, 3vw, 32px) clamp(20px, 4vw, 44px);
@@ -1978,6 +1981,8 @@ a {
 }
 .story__section--alt {
   background: var(--paper-2);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
 }
 /* pinned to pure white regardless of where the alternation lands — for a
    section whose lead media renders its own white canvas, where the usual
@@ -2122,6 +2127,8 @@ a {
    them muddies the accent */
 .story__stats-section.story__section--alt {
   background: var(--paper);
+  border-top: 0;
+  border-bottom: 0;
 }
 .story__stats-label {
   font-family: var(--font-mono);
@@ -2496,7 +2503,7 @@ a {
 }
 
 @media (max-width: 700px) {
-  .story__meta {
+  .story__meta-inner {
     grid-template-columns: 1fr;
   }
   .story__meta-item {

@@ -258,11 +258,13 @@ function storyBodyMarkup(project) {
       const media = `<div class="story__media${stackClass}">${imgs}</div>`;
       const side = s.side === "right" ? " story__media-row--right" : "";
       return `
-      <section class="story__section story__media-row${side}${alt}" data-story-in>
-        ${media}
-        <div class="story__media-copy">
-          ${s.label ? `<p class="story__stats-label story__media-label">${s.label}</p>` : ""}
-          <p class="story__paragraph">${s.text}</p>
+      <section class="story__section${alt}" data-story-in>
+        <div class="story__media-row${side}">
+          ${media}
+          <div class="story__media-copy">
+            ${s.label ? `<p class="story__stats-label story__media-label">${s.label}</p>` : ""}
+            <p class="story__paragraph">${s.text}</p>
+          </div>
         </div>
       </section>`;
     })
@@ -292,17 +294,19 @@ function storyMarkup(project, others) {
   return `
     <div class="case__story" data-story>
       <div class="story__meta">
-        <div class="story__meta-item">
-          <span>Platform</span>
-          <strong>${project.platform}</strong>
-        </div>
-        <div class="story__meta-item">
-          <span>Role</span>
-          <strong>${project.role}</strong>
-        </div>
-        <div class="story__meta-item story__meta-item--overview">
-          <span>Overview</span>
-          <p>${project.blurb}</p>
+        <div class="story__meta-inner">
+          <div class="story__meta-item">
+            <span>Platform</span>
+            <strong>${project.platform}</strong>
+          </div>
+          <div class="story__meta-item">
+            <span>Role</span>
+            <strong>${project.role}</strong>
+          </div>
+          <div class="story__meta-item story__meta-item--overview">
+            <span>Overview</span>
+            <p>${project.blurb}</p>
+          </div>
         </div>
       </div>
 
