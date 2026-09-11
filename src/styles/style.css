@@ -1033,6 +1033,7 @@ a {
    TECH STACK
    ============================================================ */
 .stack {
+  margin-top: clamp(32px, 5vw, 64px);
   padding: clamp(58px, 8vw, 104px) var(--edge);
   display: flex;
   flex-direction: column;
