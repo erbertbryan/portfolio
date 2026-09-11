@@ -2828,15 +2828,6 @@ a {
   height: 50vh;
   min-height: 320px;
   max-height: 580px;
-}
-/* the quote line eats into this fixed-height window's budget same as
-   everything else in it — without extra room here, the filmstrip (the
-   only flexible child) shrinks to fit and its cards' drop shadows run
-   out of clearance against the strip's own overflow: hidden */
-.folder.is-open:has(.folder__quote) {
-  height: calc(50vh + 74px);
-  min-height: 394px;
-  max-height: 654px;
   z-index: 5;
   padding: 0;
   border: 1px solid var(--ink);
@@ -2847,6 +2838,15 @@ a {
   flex-direction: column;
   align-items: stretch;
   justify-content: flex-start;
+}
+/* the quote line eats into this fixed-height window's budget same as
+   everything else in it — without extra room here, the filmstrip (the
+   only flexible child) shrinks to fit and its cards' drop shadows run
+   out of clearance against the strip's own overflow: hidden */
+.folder.is-open:has(.folder__quote) {
+  height: calc(50vh + 74px);
+  min-height: 394px;
+  max-height: 654px;
 }
 .folder.is-open:hover {
   background: var(--card);
