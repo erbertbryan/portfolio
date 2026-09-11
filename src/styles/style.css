@@ -3353,6 +3353,9 @@ body.no-scroll {
     min-height: 400px;
     max-height: 560px;
   }
+  .folder__quote-break {
+    display: block;
+  }
 }
 
 @media (max-width: 560px) {

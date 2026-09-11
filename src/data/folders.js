@@ -8,7 +8,10 @@ export const folders = [
     label: "Beyond the Screen",
     hint: "Talks, workshops, & volunteer work",
     accent: "#6C5CE7",
-    quote: "Time isn’t merely measured — it’s experienced.",
+    // an em dash reads as orphaned starting a line, so it stays glued to
+    // the end of the first half on the mobile-only line break — see
+    // .folder__quote-break in style.css
+    quote: ["Time isn’t merely measured —", "it’s experienced."],
     photos: [
       { src: "/folders/devcon/devcon-01.webp", rot: -2 },
       { src: "/folders/devcon/devcon-02.webp", rot: 1.5 },

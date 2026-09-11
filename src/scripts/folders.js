@@ -244,7 +244,22 @@ export function initFolders() {
     if (folder.quote) {
       const quote = document.createElement("p");
       quote.className = "folder__quote";
-      quote.textContent = folder.quote;
+      // an array marks the point a mobile-only line break belongs at —
+      // see .folder__quote-break in style.css. Plain text on both sides
+      // of that span, so it still reads as one line above that breakpoint.
+      if (Array.isArray(folder.quote)) {
+        const [first, ...rest] = folder.quote;
+        quote.append(first + " ");
+        rest.forEach((part, i) => {
+          const span = document.createElement("span");
+          span.className = "folder__quote-break";
+          span.textContent = part;
+          quote.append(span);
+          if (i < rest.length - 1) quote.append(" ");
+        });
+      } else {
+        quote.textContent = folder.quote;
+      }
       card.appendChild(quote);
     }
 
