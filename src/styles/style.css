@@ -3333,6 +3333,22 @@ body.no-scroll {
   .folders__grid {
     margin-top: 0;
   }
+  /* the photo cards themselves don't scale down with viewport (their
+     width floors out at 220px), so the desktop heights below just pad
+     the strip with dead space above/below them on a phone-width window */
+  .folder.is-open {
+    height: 42vh;
+    min-height: 260px;
+    max-height: 380px;
+  }
+  .folder[data-folder-id="artworks"].folder.is-open {
+    min-height: 320px;
+  }
+  .folder.is-open:has(.folder__quote) {
+    height: calc(42vh + 60px);
+    min-height: 320px;
+    max-height: 460px;
+  }
 }
 
 @media (max-width: 560px) {
