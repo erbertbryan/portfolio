@@ -3344,10 +3344,14 @@ body.no-scroll {
   .folder[data-folder-id="artworks"].folder.is-open {
     min-height: 320px;
   }
+  /* needs more headroom than the plain rule above: the quote still
+     takes its own ~70px underneath, so the same shrink applied to the
+     strip's share left too little clearance for the rotated photos'
+     drop shadow, clipped by the strip's overflow: hidden */
   .folder.is-open:has(.folder__quote) {
-    height: calc(42vh + 60px);
-    min-height: 320px;
-    max-height: 460px;
+    height: calc(42vh + 140px);
+    min-height: 400px;
+    max-height: 560px;
   }
 }
 
