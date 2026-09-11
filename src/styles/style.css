@@ -1933,6 +1933,10 @@ a {
 .case__story {
   position: relative;
   z-index: 1;
+  /* cancels .case's own --case-pad-x so the full-bleed bands below
+     (.story__meta, .story__section--alt) reach the true viewport edge
+     instead of stopping at the header card's inset */
+  margin: 0 calc(-1 * var(--case-pad-x));
   background: var(--paper);
 }
 
