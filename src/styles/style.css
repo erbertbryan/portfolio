@@ -745,8 +745,11 @@ a {
    ============================================================ */
 .process {
   position: relative;
+  margin: 0 var(--edge);
   padding: clamp(80px, 12vw, 160px) 0;
-  background: transparent;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 24px;
   color: var(--ink);
 }
 .process .section-head {
