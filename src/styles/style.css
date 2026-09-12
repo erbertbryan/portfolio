@@ -394,6 +394,11 @@ a {
   display: flex;
   flex-direction: column;
   align-items: center;
+  /* stage no longer flex-grows to fill 100dvh (see .hero__stage), so any
+     slack left over after the fixed nav-clearance padding is real free
+     space here — centring the column splits it evenly above and below
+     the wheel instead of all of it collecting under the wheel. */
+  justify-content: center;
   padding: clamp(128px, 18vh, 200px) var(--edge) 0;
   overflow: hidden;
   isolation: isolate;
@@ -469,13 +474,22 @@ a {
   }
 }
 
-/* the wheel fills whatever height is left under the headline */
+/* the wheel's box is sized to its own min-height, not stretched to fill
+   the viewport — letting it flex-grow dumped all the leftover vertical
+   space below the (top-aligned) wheel, pushing the whole hero block up
+   against the nav and leaving a growing dead gap above the scroll arrow
+   on taller viewports. Fixed height + .hero's justify-content: center
+   puts that leftover space evenly above and below instead.
+   The max was also pulled in from 620 to 460: .wheel-wrap's
+   perspective-origin is 50% 50%, i.e. 50% of THIS box's own height, so
+   a taller cap here also drags the cards further down toward that
+   box-relative centre — worth keeping in mind before raising it again. */
 .hero__stage {
   position: relative;
   z-index: 1;
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   width: 100vw;
-  min-height: clamp(260px, 46vh, 620px);
+  min-height: clamp(260px, 46vh, 460px);
   margin-top: 0;
 }
 
