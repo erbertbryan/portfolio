@@ -297,13 +297,13 @@ export const projects = [
         type: "bento",
         text: "By replacing fragmented legacy tools with a unified platform, SmashHub eliminated booking friction for players while equipping facility managers with clear operational KPIs, court occupancy heatmaps, and automated revenue tracking.",
         images: [
-          "/carousel/smash-section5-1.webp",
-          "/carousel/smash-section5-2.webp",
           {
             type: "video",
             src: "/carousel/smash-customer-demo.mp4",
             poster: "/carousel/smash-customer-demo-poster.webp",
           },
+          "/carousel/smash-section5-2.webp",
+          "/carousel/smash-section5-1.webp",
           {
             type: "video",
             src: "/carousel/smash-admin-demo.mp4",
