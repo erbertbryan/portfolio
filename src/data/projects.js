@@ -296,6 +296,10 @@ export const projects = [
       {
         type: "bento",
         text: "By replacing fragmented legacy tools with a unified platform, SmashHub eliminated booking friction for players while equipping facility managers with clear operational KPIs, court occupancy heatmaps, and automated revenue tracking.",
+        // the videos run taller than the screenshots at the same width, so
+        // the locked-row grid left dead space under whichever tile in each
+        // pair was shorter — see the same fix on Mugna's section 5
+        masonry: true,
         images: [
           {
             type: "video",
