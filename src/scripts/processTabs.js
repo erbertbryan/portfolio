@@ -11,10 +11,9 @@ const STAR = `
   <svg viewBox="0 0 24 24" aria-hidden="true">
     <defs>
       <linearGradient id="aistar" x1="0" y1="0" x2="24" y2="24">
-        <stop offset="0" stop-color="#6c5ce7"/>
-        <stop offset=".45" stop-color="#f472b6"/>
-        <stop offset=".75" stop-color="#f5a524"/>
-        <stop offset="1" stop-color="#34d399"/>
+        <stop offset="0" stop-color="#1a73e8"/>
+        <stop offset=".55" stop-color="#4285f4"/>
+        <stop offset="1" stop-color="#8ab4f8"/>
       </linearGradient>
     </defs>
     <path fill="url(#aistar)" d="M12 1.5c1 6.6 3.9 9.5 10.5 10.5C15.9 13 13 15.9 12 22.5 11 15.9 8.1 13 1.5 12 8.1 11 11 8.1 12 1.5Z"/>
