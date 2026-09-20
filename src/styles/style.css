@@ -988,7 +988,10 @@ a {
   inset: 0;
   border-radius: 999px;
   padding: 1.5px;
-  background: var(--gem-grad);
+  /* not --gem-grad: its pale end (#8ab4f8) all but vanishes against the
+     white chip, so the ring read as broken on the right. Symmetric and
+     never lighter than a mid blue, so the outline stays continuous. */
+  background: linear-gradient(100deg, var(--gem-deep), #5b95f5 50%, var(--gem-deep));
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
