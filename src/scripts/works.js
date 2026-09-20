@@ -38,7 +38,9 @@ export function showcase(p, { big } = {}) {
     // unit, so there's no separate animated layer to drift out of sync.
     // Playback itself is driven elsewhere, and differently depending on
     // state — see initHeroVideoScrub below (closed card) and playHeroOnce
-    // in deepdive.js (deep-dive header). preload="auto" rather than "metadata":
+    // in deepdive.js (deep-dive header). Starts at preload="metadata" so
+    // five clips don't all download on first paint; initHeroVideoScrub
+    // bumps each to "auto" when its card is about a screen away, since
     // scrubbing needs real frame data buffered, not just duration.
     return `<div class="showcase showcase--hero">
       <div class="showcase--hero__card">
@@ -47,7 +49,7 @@ export function showcase(p, { big } = {}) {
           poster="${p.heroVideo.poster}"
           muted
           playsinline
-          preload="auto"
+          preload="metadata"
           aria-label="${p.name} product screen"
         ></video>
       </div>
@@ -177,9 +179,38 @@ function initHeroReveal(root) {
    what keeps the two from fighting over it. */
 function initHeroVideoScrub(root) {
   const vids = root.querySelectorAll(".showcase--hero__card video");
+
+  const warm = new IntersectionObserver(
+    (entries, obs) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        e.target.preload = "auto";
+        obs.unobserve(e.target);
+      });
+    },
+    { rootMargin: "100% 0px" }
+  );
+
   vids.forEach((v) => {
+    warm.observe(v);
+    const card = v.closest(".case");
+    // .showcase--hero is the un-transformed positioned wrapper; the video
+    // itself sits under the reveal tilt/scale, which would skew its rect
+    const track = v.closest(".showcase--hero");
     attachScrub(v, {
-      skip: () => v.closest(".case")?.classList.contains("is-expanded"),
+      skip: () => card.classList.contains("is-expanded"),
+      track,
+      // The cards are position: sticky, so the video stops moving once its
+      // card locks in at the --stick offset — the default "top reaches 15%
+      // of the viewport" range is never reached (the clip stalled around
+      // 60%). Map it to the card's own entry instead: 0 as the video's top
+      // comes over the fold, 1 exactly as the card locks in place, so the
+      // clip always lands its final frame as the card settles.
+      range: (r) => {
+        const stick = parseFloat(getComputedStyle(card).top) || 0;
+        const offset = r.top - card.getBoundingClientRect().top;
+        return [window.innerHeight * 0.92, stick + offset];
+      },
     });
   });
 }

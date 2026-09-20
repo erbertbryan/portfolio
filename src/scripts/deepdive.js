@@ -467,8 +467,11 @@ function scrollHost(el) {
    project cards' hero videos (see initHeroVideoScrub in works.js). An
    optional skip() predicate, checked on every tick, lets a caller hand
    control back to some other mechanism (e.g. once a card expands into a
-   deep dive) without detaching the listeners entirely. */
-export function attachScrub(v, { skip } = {}) {
+   deep dive) without detaching the listeners entirely. An optional
+   track element + range() override the default mapping below, for media
+   whose position in the viewport isn't a plain function of scroll (the
+   sticky project cards: see initHeroVideoScrub). */
+export function attachScrub(v, { skip, track, range } = {}) {
   if (REDUCE) return; // the poster frame stands in; scrubbing is scroll-driven motion
   const host = scrollHost(v);
   let raf = null;
@@ -497,9 +500,10 @@ export function attachScrub(v, { skip } = {}) {
     // viewport-relative no matter which element is actually doing the
     // scrolling, so only the event source above needed to change to fix
     // the locked-body case, not this math.
-    const r = v.getBoundingClientRect();
-    const startY = window.innerHeight;
-    const endY = window.innerHeight * 0.15;
+    const r = (track || v).getBoundingClientRect();
+    const [startY, endY] = range
+      ? range(r)
+      : [window.innerHeight, window.innerHeight * 0.15];
     const progress = Math.min(1, Math.max(0, (startY - r.top) / (startY - endY)));
     v.currentTime = progress * v.duration;
   };
