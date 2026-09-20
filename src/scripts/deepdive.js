@@ -461,6 +461,65 @@ function scrollHost(el) {
   return window;
 }
 
+/* Drives one video's currentTime directly off how far it's travelled
+   through its scroll container, forward or reverse, instead of autoplay —
+   shared by the deep dive's own data-scrub media (below) and the closed
+   project cards' hero videos (see initHeroVideoScrub in works.js). An
+   optional skip() predicate, checked on every tick, lets a caller hand
+   control back to some other mechanism (e.g. once a card expands into a
+   deep dive) without detaching the listeners entirely. */
+export function attachScrub(v, { skip } = {}) {
+  if (REDUCE) return; // the poster frame stands in; scrubbing is scroll-driven motion
+  const host = scrollHost(v);
+  let raf = null;
+
+  const apply = () => {
+    // the deep dive can close (or switch to another project) while a
+    // scroll from an earlier open is still queued for this handler —
+    // self-detach the moment the video is no longer on the page rather
+    // than chasing a node that's already gone
+    if (!v.isConnected) {
+      host.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      return;
+    }
+    if (skip && skip()) return; // some other mechanism owns this frame right now
+    if (!v.duration) return; // metadata not ready yet
+
+    // progress 0 as the element's top first reaches the viewport's
+    // bottom edge (it's just entering), 1 once that top edge has risen
+    // to 15% down from the top of the viewport — finishing near the top
+    // of the screen while the clip is still fully visible there, rather
+    // than mapping the last frame to the moment it scrolls out of view
+    // (where nobody would ever actually see it land). Tied to viewport
+    // height rather than the element's own, so the range doesn't shift
+    // if this clip's display size ever changes. getBoundingClientRect is
+    // viewport-relative no matter which element is actually doing the
+    // scrolling, so only the event source above needed to change to fix
+    // the locked-body case, not this math.
+    const r = v.getBoundingClientRect();
+    const startY = window.innerHeight;
+    const endY = window.innerHeight * 0.15;
+    const progress = Math.min(1, Math.max(0, (startY - r.top) / (startY - endY)));
+    v.currentTime = progress * v.duration;
+  };
+
+  const onScroll = () => {
+    if (raf) return;
+    raf = requestAnimationFrame(() => {
+      raf = null;
+      apply();
+    });
+  };
+
+  host.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll, { passive: true });
+  // set the frame matching wherever the page already is the moment this
+  // opens, rather than waiting for the next scroll to catch up
+  if (v.readyState >= 1) apply();
+  else v.addEventListener("loadedmetadata", apply, { once: true });
+}
+
 /* Videos marked data-scrub skip autoplay and loop entirely — scrolling
    (either direction) sets currentTime directly off how far the clip has
    travelled through its scroll container, so it plays forward or reverses
@@ -468,56 +527,25 @@ function scrollHost(el) {
 function initScrubVideos(root) {
   const vids = root.querySelectorAll("video[data-scrub]");
   if (!vids.length) return;
-  if (REDUCE) return; // the poster frame stands in; scrubbing is scroll-driven motion
+  vids.forEach((v) => attachScrub(v));
+}
 
-  vids.forEach((v) => {
-    const host = scrollHost(v);
-    let raf = null;
-
-    const apply = () => {
-      // the deep dive can close (or switch to another project) while a
-      // scroll from an earlier open is still queued for this handler —
-      // self-detach the moment the video is no longer on the page rather
-      // than chasing a node that's already gone
-      if (!v.isConnected) {
-        host.removeEventListener("scroll", onScroll);
-        window.removeEventListener("resize", onScroll);
-        return;
-      }
-      if (!v.duration) return; // metadata not ready yet
-
-      // progress 0 as the element's top first reaches the viewport's
-      // bottom edge (it's just entering), 1 once that top edge has risen
-      // to 15% down from the top of the viewport — finishing near the top
-      // of the screen while the clip is still fully visible there, rather
-      // than mapping the last frame to the moment it scrolls out of view
-      // (where nobody would ever actually see it land). Tied to viewport
-      // height rather than the element's own, so the range doesn't shift
-      // if this clip's display size ever changes. getBoundingClientRect is
-      // viewport-relative no matter which element is actually doing the
-      // scrolling, so only the event source above needed to change to fix
-      // the locked-body case, not this math.
-      const r = v.getBoundingClientRect();
-      const startY = window.innerHeight;
-      const endY = window.innerHeight * 0.15;
-      const progress = Math.min(1, Math.max(0, (startY - r.top) / (startY - endY)));
-      v.currentTime = progress * v.duration;
-    };
-
-    const onScroll = () => {
-      if (raf) return;
-      raf = requestAnimationFrame(() => {
-        raf = null;
-        apply();
-      });
-    };
-
-    host.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll, { passive: true });
-    // set the frame matching wherever the page already is the moment this
-    // opens, rather than waiting for the next scroll to catch up
-    if (v.readyState >= 1) apply();
-    else v.addEventListener("loadedmetadata", apply, { once: true });
+/* The deep-dive header reuses the exact same <video> as the closed card
+   (see .showcase--hero in works.js) — while closed, scroll scrubs it
+   (initHeroVideoScrub); the moment it becomes the expanded header
+   instead, it just plays through once and holds its last frame, same as
+   it always has — no scroll tie-in here, nothing new to animate.
+   Idempotent via a dataset flag: switching between projects can pass
+   back through a header that's already played. */
+function playHeroOnce(el) {
+  const v = el.querySelector(".showcase--hero__card video");
+  if (!v || v.dataset.played || REDUCE) return;
+  v.dataset.played = "1";
+  v.play().catch(() => {}); // autoplay can still be blocked; the poster covers it
+  // a backgrounded tab can throttle a script-started video and pause it
+  // mid-clip; resume rather than leave it stranded wherever it stalled
+  v.addEventListener("pause", () => {
+    if (!v.ended) v.play().catch(() => {});
   });
 }
 
@@ -679,6 +707,7 @@ export function initDeepDive(root, cards, stack) {
     el.querySelectorAll("[data-switch]").forEach((btn) => {
       btn.addEventListener("click", () => switchTo(btn.dataset.switch));
     });
+    playHeroOnce(el);
     initCounters(el);
     initScrubVideos(el);
     initShiftedMedia(el);
@@ -761,6 +790,7 @@ export function initDeepDive(root, cards, stack) {
       toEl.classList.add("is-expanded");
       toEl.insertAdjacentHTML("beforeend", storyMarkup(toCard.project, others));
       revealHero(toEl);
+      playHeroOnce(toEl);
       initCounters(toEl);
       initScrubVideos(toEl);
       initShiftedMedia(toEl);
@@ -830,6 +860,7 @@ export function initDeepDive(root, cards, stack) {
     el.classList.add("is-expanded");
     el.insertAdjacentHTML("beforeend", storyMarkup(project, others));
     revealHero(el);
+    playHeroOnce(el);
     el.querySelector("[data-story]").classList.add("is-in");
     el.querySelectorAll("[data-switch]").forEach((btn) => {
       btn.addEventListener("click", () => switchTo(btn.dataset.switch));

@@ -6,7 +6,7 @@ import {
   mobileFinance,
   mobileOnboard,
 } from "./mockups.js";
-import { initDeepDive } from "./deepdive.js";
+import { initDeepDive, attachScrub } from "./deepdive.js";
 
 const gens = { webDash, webLanding, mobileFeed, mobileFinance, mobileOnboard };
 
@@ -36,7 +36,10 @@ export function showcase(p, { big } = {}) {
     // reveal-tilt transform still lives only on the outer card: a
     // transformed parent carries its whole rendered subtree as one rigid
     // unit, so there's no separate animated layer to drift out of sync.
-    // Playback itself is handled once, elsewhere — see initHeroVideoPlay.
+    // Playback itself is driven elsewhere, and differently depending on
+    // state — see initHeroVideoScrub below (closed card) and playHeroOnce
+    // in deepdive.js (deep-dive header). preload="auto" rather than "metadata":
+    // scrubbing needs real frame data buffered, not just duration.
     return `<div class="showcase showcase--hero">
       <div class="showcase--hero__card">
         <video
@@ -44,7 +47,7 @@ export function showcase(p, { big } = {}) {
           poster="${p.heroVideo.poster}"
           muted
           playsinline
-          preload="metadata"
+          preload="auto"
           aria-label="${p.name} product screen"
         ></video>
       </div>
@@ -134,7 +137,7 @@ export function initWorks() {
   );
   initDeepDive(root, cards, stack);
   initHeroReveal(root);
-  initHeroVideoPlay(root);
+  initHeroVideoScrub(root);
 }
 
 /* hero-screenshot showcases lie flat (tilted back in 3D) and rise upright
@@ -164,37 +167,21 @@ function initHeroReveal(root) {
   targets.forEach((t) => io.observe(t));
 }
 
-/* Each hero video plays through exactly once, whichever moment it first
-   becomes visible — home card or, on a direct deep-dive link, straight
-   into the expanded view — then holds on its own last frame. Unlike the
-   card's tilt reveal above, this never resets: no loop, no replay on
-   re-entry, no scroll or hover driving it. The elements exist in the DOM
-   from the very first render (every card is built up front), so one
-   observer set up here already covers both entry paths. */
-function initHeroVideoPlay(root) {
+/* Closed card only: scrolling the card into (or out of) view scrubs the
+   hero video's currentTime directly, forward and back, same mechanism
+   deep-dive lead clips use (attachScrub, see deepdive.js) — reusing it
+   here rather than a second copy of that math. Stops the instant this
+   card becomes the expanded deep-dive header, handing playback off to
+   playHeroOnce (deepdive.js) instead, which is the only other thing
+   that ever touches this element's currentTime — the skip() check is
+   what keeps the two from fighting over it. */
+function initHeroVideoScrub(root) {
   const vids = root.querySelectorAll(".showcase--hero__card video");
-  if (!vids.length) return;
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return; // the poster is already its last frame
-
-  const io = new IntersectionObserver(
-    (entries, obs) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        const v = entry.target;
-        v.play().catch(() => {}); // autoplay can still be blocked; the poster covers it
-        // a backgrounded tab can throttle a script-started video and pause
-        // it mid-clip; resume rather than leave it stranded on whatever
-        // frame it happened to stall on — once 'ended' fires this simply
-        // never runs again, so it can't fight the freeze on the last frame
-        v.addEventListener("pause", () => {
-          if (!v.ended) v.play().catch(() => {});
-        });
-        obs.unobserve(v);
-      });
-    },
-    { threshold: 0.2 }
-  );
-  vids.forEach((v) => io.observe(v));
+  vids.forEach((v) => {
+    attachScrub(v, {
+      skip: () => v.closest(".case")?.classList.contains("is-expanded"),
+    });
+  });
 }
 
 /* As the next case scrolls up to cover the current one, gently scale + dim it.
